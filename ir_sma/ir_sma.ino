@@ -1,6 +1,7 @@
 //#include <Servo.h>
 //Global variables
 #define SMA_PIN   9     //Pin # for SMA PWM on P2
+#define LED_PIN   13    //Pin # for on-board Teensy LED
 #define IR_PIN A0
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
 #define TIME_OFF  20    //In Seconds (At least 30s)
@@ -14,6 +15,7 @@ int deg = 0;    // サーボの角度
 void setup() {
   // Declarations for Sensor and Actuator Pins
   pinMode(SMA_PIN,OUTPUT);
+  pinMode(LED_PIN,OUTPUT); // On-Board Indicator LED
   pinMode(IR_PIN,INPUT);
 
   //Intialize Serial Communication
@@ -56,23 +58,31 @@ double analog2distance(int ans){
 
 // メインループ
 void loop() {
-  int ir_value = analogRead(IR_PIN);
+  //int ir_value = analogRead(IR_PIN);
   //face_value = :TODO
-  double ir_distance = analog2distance(ir_value);
+  //double ir_distance = analog2distance(ir_value);
   //Serial.println(ir_value);
-  sendIntData(ir_value);
+  //sendIntData(ir_value);
   //sendIntData(ir_value,face_value);
 
   //receive calced deg value
+  //deg = serialNumVal();
   deg = serialNumVal();
-  //Serial.println(deg);
-  analogWrite(SMA_PIN,0);
   if(deg>0||deg<=100){
     analogWrite(SMA_PIN,map(deg, 0, 100, 0, 255)); //75% duty cycle = 191, 50% = 127, etc.
+    digitalWrite(LED_PIN,HIGH);
+    delay(TIME_ON*1000); // SMA ON time (ms)
+    analogWrite(SMA_PIN,0);
+    digitalWrite(LED_PIN, LOW);
+  }
+  //Serial.println(deg);
+  //analogWrite(SMA_PIN,0);
+  //if(deg>0||deg<=100){
+    //analogWrite(SMA_PIN,map(deg, 0, 100, 0, 255)); //75% duty cycle = 191, 50% = 127, etc.
     //digitalWrite(LED_PIN,HIGH);
     //delay(TIME_ON*1000); // SMA ON time (ms)
     //analogWrite(SMA_PIN,0);
     //digitalWrite(LED_PIN, LOW);
-  }
+  //}
   
 }
