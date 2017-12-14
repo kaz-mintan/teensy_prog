@@ -9,7 +9,7 @@ import binascii
 ser = serial.Serial("/dev/ttyACM0", 19200, timeout=1)
 
 def react_formula(ir_value):
-    sma_val=ir_value*2/3
+    sma_val=ir_value*1/3
     return sma_val
 
 if __name__ == '__main__':
@@ -40,15 +40,14 @@ if __name__ == '__main__':
             str_low = ser.read()
             data_low=binascii.b2a_hex(str_low)
             int_low=int(data_low,16)
-            high = (int_high << 8)
             low = (int_low& 0xFF)
-            read_val = (high << 8|low)
+            read_val = (int_high << 8|low)
             int_val = int(read_val)
         #read_data = recvThread()
             if read_val!= None:
                 print('main:read_data', int_val, read_val)
                 #ここでちゃんと数値が垂れ流されてる？
-                #deg = react_formula(int_val)
+                deg = react_formula(int_val)
                 #ser.write(deg)
                 #ser.write(str(deg)+"\0")
                 #ここでちゃんと遅れてる？
