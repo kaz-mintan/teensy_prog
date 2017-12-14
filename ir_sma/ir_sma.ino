@@ -11,6 +11,7 @@ char input[4];  // 文字列格納用
 int i = 0;      // 文字数のカウンタ
 int val = 0;    // 受信した数値
 int deg = 0;    // サーボの角度
+int ir_value = 0;
 
 void setup() {
   // Declarations for Sensor and Actuator Pins
@@ -19,7 +20,7 @@ void setup() {
   pinMode(IR_PIN,INPUT);
 
   //Intialize Serial Communication
-  Serial.begin(19200);
+  Serial.begin(921600);
 }
 
 // int型のデータを送信する関数
@@ -58,23 +59,29 @@ double analog2distance(int ans){
 
 // メインループ
 void loop() {
-  //int ir_value = analogRead(IR_PIN);
+  ir_value = analogRead(IR_PIN);
   //face_value = :TODO
   //double ir_distance = analog2distance(ir_value);
   //Serial.println(ir_value);
-  //sendIntData(ir_value);
+  sendIntData(ir_value);
   //sendIntData(ir_value,face_value);
 
   //receive calced deg value
   //deg = serialNumVal();
-  deg = serialNumVal();
-  if(deg>0||deg<=100){
+  //Serial.println(ir_value);
+  //if (ir_value > 50){
+    //deg = 40;
+  //}
+  //deg = serialNumVal();
+  if(deg>20&&deg<=100){
     analogWrite(SMA_PIN,map(deg, 0, 100, 0, 255)); //75% duty cycle = 191, 50% = 127, etc.
     digitalWrite(LED_PIN,HIGH);
     delay(TIME_ON*1000); // SMA ON time (ms)
     analogWrite(SMA_PIN,0);
     digitalWrite(LED_PIN, LOW);
+    deg=0;
   }
+  deg = 0;
   //Serial.println(deg);
   //analogWrite(SMA_PIN,0);
   //if(deg>0||deg<=100){
