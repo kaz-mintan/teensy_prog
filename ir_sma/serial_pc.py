@@ -6,10 +6,14 @@ import threading
 import binascii
 
 # シリアル通信の設定(
-ser = serial.Serial("/dev/ttyACM0", 19200, timeout=1)
+ser = serial.serial("/dev/ttyacm0", 9600, timeout=1)
 
 def react_formula(ir_value):
     sma_val=ir_value*1/3
+    if ir_value>30:
+        sma_val = 30
+    else:
+        sma_val = 0
     return sma_val
 
 if __name__ == '__main__':
@@ -48,7 +52,7 @@ if __name__ == '__main__':
                 print('main:read_data', int_val, read_val)
                 #ここでちゃんと数値が垂れ流されてる？
                 deg = react_formula(int_val)
-                #ser.write(deg)
+                ser.write(chr(deg))
                 #ser.write(str(deg)+"\0")
                 #ここでちゃんと遅れてる？
                 #終了処理などちゃんとして？
