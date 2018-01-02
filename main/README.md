@@ -1,5 +1,6 @@
 # rainforce learning program
 
+## main program
 - motion_dqn.py
 
 	- is main program.
@@ -16,9 +17,10 @@
 		- sequence.py
 			- to calculate the features of time sequence data of facial expression and ir sensor.
 
-	- in a simlation mode, motion_dqn.py uses the modules which are shown below.
+## simulation mode
+- in a simlation mode, motion_dqn.py uses the modules which are shown below.
 
-		- dummy_evaluator.py
-			- to get dummy facial expression as an evaluator.
-		- hand_motion.py
-			- to get dummy information of ir sensor.
+	- dummy_evaluator.py
+		- to get dummy facial expression as an evaluator.
+	- hand_motion.py
+		- to get dummy information of ir sensor.
