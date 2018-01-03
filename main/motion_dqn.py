@@ -7,6 +7,7 @@ from hand_motion import *
 from dummy_evaluator import *
 from neural_network import *
 from datetime import datetime
+from serial_pc import *
 
 
 import sys
@@ -33,6 +34,9 @@ epoch = 1000
 
 val_max = 0.8
 val_min = 0.2
+
+host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
+port = 50000 #クライアントと同じPORTをしてあげます
 
 def normalization(array, val_max, val_min):
     x_max = np.max(array)
@@ -107,16 +111,17 @@ if mode == 'predict':
 rewed= 0.0
 acted = action[:,0]
 
+#sensor= GetSensor(host, port)
+
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros_like(state_before)
     acted = action[:,episode]
     print('epi',episode,target_type,target_direct,mode,'act',acted,'rew',rewed)
 
-
-
     for t in range(1,t_window):  #roup for 1 time window
         #state[:,t] = get_sensor()
+        #print(sensor.get_sensor())
         state[:,t] = np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
 
     ### calcurate s_{t+1} based on the value of sensors
@@ -133,15 +138,18 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     q_teacher = Q_func.update(state_mean,num_action,num_face,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
 
     if mode == 'predict':
-        state_predict, p_teacher = P_func.predict_update(state_mean,num_action,
+        state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,num_action,
                 num_face,action, episode,p_teacher,reward,next_q,
                 select_episode, gamma, alpha)
+
     before_state = state[:,t_window-1]
     acted = action[:,episode+1]
     rewed = reward[episode]
     state_before = state
+    print('q_val',q_teacher[:,episode])
 
 np.savetxt('action_pwm.csv', action[0,:], fmt="%.0f", delimiter=",")
 np.savetxt('reward_seq.csv', reward, fmt="%.5f",delimiter=",")
 np.savetxt('situation.csv', state_mean.T,fmt="%.2f", delimiter=",")
 np.savetxt('random_counter.csv', random,fmt="%.0f", delimiter=",")
+np.savetxt('q_value.csv', q_teacher,fmt="%.5f", delimiter=",")

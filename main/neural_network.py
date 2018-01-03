@@ -3,6 +3,7 @@ import math
 import random
 #from matplotlib import pyplot
 select_episode = 10
+type_face = 5
 
 def select_teach(input_array, q_teacher,episode,num=select_episode):
     index_array = numpy.argsort(q_teacher)[::-1]
@@ -109,15 +110,16 @@ class Neural:
         self.train(q_selected_input,q_selected_teacher.T)
         return q_teacher
 
-    def predict_update(self, state_mean, num_action, num_face, action, episode, q_teacher,
+    def predict_update(self, state_mean, state_predict,num_action, num_face, action, episode, p_teacher,
             reward, next_q, select_episode, gamma, alpha):
 
+        p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
         p_array[:,0]=numpy.hstack((state_mean[:,episode+1]/num_face,
             action[:,episode+1]/num_action))
-        C, face_predict =P_func.predict(p_array.T)
+        C, face_predict =self.predict(p_array.T)
         state_predict[0,:type_face] = face_predict
 
-        p_input_array = numpy.zeros((p_input_size,episode))
+        p_input_array = numpy.zeros((self.input_size,episode))
         p_input_array = numpy.hstack((((state_mean[:,:episode])/num_face).T,
             (action[:,:episode]/num_action).T))
         p_teacher[:,episode] = state_mean[:type_face,episode]
@@ -129,7 +131,7 @@ class Neural:
             p_selected_input = p_input_array
             p_selected_teacher = p_teacher[:,:episode]
 
-        P_func.train(p_selected_input,p_selected_teacher.T)
+        self.train(p_selected_input,p_selected_teacher.T)
         return state_predict, p_teacher
 
 
