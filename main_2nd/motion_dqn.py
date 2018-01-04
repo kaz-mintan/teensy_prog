@@ -15,7 +15,7 @@ import sys
 select_episode = 50
 
 t_window = 30  #number of time window
-num_episodes = 100  #number of all trials
+num_episodes = 200  #number of all trials
 
 type_face = 5
 type_ir = 1
@@ -23,7 +23,7 @@ type_action = 1
 
 num_face = 100 #%
 num_ir = 100 #5mm
-num_action = 60 #%:pwm
+num_action = 100 #%:pwm
 
 gamma = 0.9
 alpha = 0.5
@@ -91,8 +91,8 @@ q_hidden_size = (q_input_size + q_output_size )/3
 q_teacher = np.zeros((q_output_size,num_episodes))
 
 Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch)
-q_first_iteacher = np.random.uniform(low=0,high=1,size=(q_input_size,2))
-q_first_oteacher = np.random.uniform(low=0,high=1,size=(q_output_size,2))
+q_first_iteacher = np.random.uniform(low=0,high=1,size=(q_input_size,1))
+q_first_oteacher = np.random.uniform(low=0,high=1,size=(q_output_size,1))
 
 Q_func.train(q_first_iteacher.T,q_first_oteacher.T)
 
@@ -105,33 +105,31 @@ if mode == 'predict':
     p_teacher = np.zeros((p_output_size,num_episodes))
 
     P_func = Neural(p_input_size, p_hidden_size, p_output_size, epsilon, mu, epoch)
-    p_first_iteacher = np.random.uniform(low=0,high=1,size=(p_input_size,2))
-    p_first_oteacher = np.random.uniform(low=0,high=1,size=(p_output_size,2))
+    p_first_iteacher = np.random.uniform(low=0,high=1,size=(p_input_size,1))
+    p_first_oteacher = np.random.uniform(low=0,high=1,size=(p_output_size,1))
 
     P_func.train(p_first_iteacher.T,p_first_oteacher.T)
 
-rewed= 0.0
-acted = action[:,0]
+#rewed= 0.0
+#acted = action[:,0]
 
 #sensor= GetSensor(host, port)
 
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros_like(state_before)
-    acted = action[:,episode]
-    print('epi',episode,target_type,target_direct,mode,'act',acted,'rew',rewed)
+    #acted = action[:,episode]
 
     for t in range(1,t_window):  #roup for 1 time window
         #state[:,t] = get_sensor()
-        #print(sensor.get_sensor())
         state[:,t] = np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
 
     ### calcurate s_{t+1} based on the value of sensors
     state_mean[:,episode+1]=seq2feature(state)
 
     ### calcurate r_{t}
-    reward[episode] = calc_reward(state/num_face, state_predict/num_face,
-            state_before/num_face,t_window, mode)
+    reward[episode] = calc_reward(state, state_predict,
+            state_before,t_window, mode)
 
     ### calcurate a_{t+1} based on s_{t+1}
     random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
@@ -145,8 +143,10 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                 select_episode, gamma, alpha)
 
     before_state = state[:,t_window-1]
-    acted = action[:,episode+1]
-    rewed = reward[episode]
+    #acted = action[:,episode+1]
+    #rewed = reward[episode]
+    print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode])
+
     state_before = state
     print('q_val',q_teacher[:,episode])
 
