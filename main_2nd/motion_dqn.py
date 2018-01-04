@@ -79,7 +79,7 @@ random = np.zeros(num_episodes)
 face_predict = np.zeros((1,type_face))
 
 state[:,0] = np.array([1,0,0,0,0,0.30])
-action[:,0] = np.random.uniform(0,60)#TODO not enough
+action[:,0] = np.random.uniform(0,1)
 
 possible_a = np.linspace(0,60,100)
 
