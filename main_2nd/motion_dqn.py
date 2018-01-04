@@ -81,7 +81,7 @@ face_predict = np.zeros((1,type_face))
 state[:,0] = np.array([1,0,0,0,0,0.30])
 action[:,0] = np.random.uniform(0,1)
 
-possible_a = np.linspace(0,60,100)
+possible_a = np.linspace(0,1,100)
 
 ## set qfunction as nn
 q_input_size = type_face + type_ir + type_action
