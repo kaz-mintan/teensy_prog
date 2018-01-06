@@ -15,7 +15,7 @@ import sys
 select_episode = 50
 
 t_window = 30  #number of time window
-num_episodes = 200  #number of all trials
+num_episodes = 300  #number of all trials
 
 type_face = 5
 type_ir = 1
@@ -37,6 +37,12 @@ val_min = 0.2
 
 host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
 port = 50000 #クライアントと同じPORTをしてあげます
+
+def nn2q(nn_q):
+    return 25.0*nn_q-12.5
+
+def q2nn(q):
+    return 0.04*q+0.5
 
 def normalization(array, val_max, val_min):
     x_max = np.max(array)
@@ -77,6 +83,7 @@ action = np.zeros((1,num_episodes))
 reward = np.zeros(num_episodes)
 random = np.zeros(num_episodes)
 face_predict = np.zeros((1,type_face))
+q_predicted = np.zeros(num_episodes)
 
 state[:,0] = np.array([1,0,0,0,0,0.30])
 action[:,0] = np.random.uniform(0,1)
@@ -91,8 +98,8 @@ q_hidden_size = (q_input_size + q_output_size )/3
 q_teacher = np.zeros((q_output_size,num_episodes))
 
 Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch)
-q_first_iteacher = np.random.uniform(low=0,high=1,size=(q_input_size,1))
-q_first_oteacher = np.random.uniform(low=0,high=1,size=(q_output_size,1))
+q_first_iteacher = np.random.uniform(low=0,high=0.001,size=(q_input_size,1))
+q_first_oteacher = np.random.uniform(low=0,high=0.001,size=(q_output_size,1))
 
 Q_func.train(q_first_iteacher.T,q_first_oteacher.T)
 
@@ -110,15 +117,9 @@ if mode == 'predict':
 
     P_func.train(p_first_iteacher.T,p_first_oteacher.T)
 
-#rewed= 0.0
-#acted = action[:,0]
-
-#sensor= GetSensor(host, port)
-
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros_like(state_before)
-    #acted = action[:,episode]
 
     for t in range(1,t_window):  #roup for 1 time window
         #state[:,t] = get_sensor()
@@ -135,6 +136,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
             num_action, num_face, state_mean, episode)
 
+    q_predicted[episode]=next_q
     q_teacher = Q_func.update(state_mean,num_action,num_face,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
 
     if mode == 'predict':
@@ -150,8 +152,9 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state_before = state
     print('q_val',q_teacher[:,episode])
 
-np.savetxt('action_pwm.csv', action[0,:], fmt="%.0f", delimiter=",")
+np.savetxt('action_pwm.csv', action[0,:], fmt="%.3f", delimiter=",")
 np.savetxt('reward_seq.csv', reward, fmt="%.5f",delimiter=",")
 np.savetxt('situation.csv', state_mean.T,fmt="%.2f", delimiter=",")
 np.savetxt('random_counter.csv', random,fmt="%.0f", delimiter=",")
 np.savetxt('q_value.csv', q_teacher,fmt="%.5f", delimiter=",")
+np.savetxt('q_predicted.csv', q_predicted,fmt="%.5f", delimiter=",")
