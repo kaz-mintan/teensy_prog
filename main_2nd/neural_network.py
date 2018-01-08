@@ -1,9 +1,31 @@
 import numpy
 import math
 import random
+import matplotlib.pyplot as plt
+
 #from matplotlib import pyplot
 select_episode = 10
 type_face = 5
+
+def nn2q(nn_q):
+    changed_q = 25.0*nn_q-12.5
+    if changed_q>10:
+        changed_q = 10
+    elif changed_q<-10:
+        changed_q=-10
+    return changed_q
+
+def q2nn(q):
+    if q>10:
+        changed_q=1
+    elif q<-10:
+        changed_q=0
+    else:
+        changed_q = 0.04 * q + 0.5
+    return changed_q
+
+def rew_q2nn(rew):
+    return 0.04*rew
 
 class Neural:
 
@@ -29,8 +51,6 @@ class Neural:
         for epo in range(self.epoch):
             #print('nn.py/X[0,:]',X[0,:])
             for i in range(N):
-                #print('nn.py/i',i)
-                #print('nn.py/X[i,:]',X[i,:])
                 x = X[i, :]
                 t = T[i, :]
 
@@ -41,7 +61,6 @@ class Neural:
     def predict(self, X):
         N = X.shape[0]
         C = numpy.zeros(N).astype('int')
-        #Y = numpy.zeros((N, T.shape[1]))
         Y = numpy.zeros((N, self.output_num))
         for i in range(N):
             x = X[i, :]
@@ -52,27 +71,54 @@ class Neural:
 
         return (C, Y)
 
-    def gen_action(self, possible_a, num_action, num_face, state_mean, episode):
-        random_rate = 0.3# * (1 / (episode + 1))
+    def gen_action(self, possible_a, num_action, num_face, state_mean, episode,random_rate,action,reward,alpha):
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
+        q_array= numpy.zeros((self.output_size,1)) #to stock predicted argument
         possible_q = numpy.zeros(100)
+        memo_q=numpy.zeros((1,100))
 
-        for i in range(100):
-            #p_array[:,0]=numpy.hstack((state_mean[:,episode+1]/num_face,possible_a[i]/num_action))
-            p_array[:,0]=numpy.hstack((state_mean[:,episode+1],possible_a[i]))
-            C, possible_q[i]=self.predict(p_array.T)
+        if episode == 0:
+            p_array[:,0]=numpy.hstack((state_mean[:,episode],action[0,episode]))
+            q_array[:,0] = alpha*q2nn(reward[episode+1])
+            self.train(p_array.T,q_array.T)
 
-        if random_rate <= numpy.random.uniform(0, 1):
-            random=1#maximize
-            #print('nn/possible_q',possible_q)
-            action=(numpy.argmax(possible_q))/100.0
+            selected_action = numpy.random.uniform(0,1)
+            random=0
+            #next_q = 0#at this point
+            p_array[:,0]=numpy.hstack((state_mean[:,episode+1],selected_action))
+            C, next_q = self.predict(p_array.T)#at this point
+
         else:
-            action=numpy.random.uniform(0,1)#TODO not enough
-            random=0 #random
+            for i in range(100):
+                p_array[:,0]=numpy.hstack((state_mean[:,episode+1],possible_a[i]))
+                C, possible_q[i]=self.predict(p_array.T)
 
-        next_q=numpy.max(possible_q)
+            #plt.clf()
+            #plt.plot(possible_a, possible_q)
 
-        return random, action, next_q
+            #plt.pause(0.01)
+
+            #print('nn_curve',possible_q[0],'---',possible_q[99])
+
+            if random_rate <= numpy.random.uniform(0, 1):
+                random=1#maximize
+                selected_action=(numpy.argmax(possible_q))/100.0
+                #print('argmax',numpy.argmax(possible_q),selected_action)
+                next_q=numpy.max(possible_q)
+            else:
+                selected_action=numpy.random.uniform(0,1)#TODO not enough
+                p_array[:,0]=numpy.hstack((state_mean[:,episode+1],selected_action))
+                C, next_q=self.predict(p_array.T)
+                random=0 #random
+            #print('nn/next_q',next_q,'next_a',selected_action,'ran',random)
+
+            ##for debug
+            memo_q[0,:]=possible_q
+            with open('q_func_curve.csv', 'a') as f_handle:
+                numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
+        print('epi',episode,'selected',selected_action,'random',random)
+
+        return random, selected_action, next_q
 
     def update(self, state_mean, num_action, num_face, action, episode, q_teacher,
             reward, next_q, select_episode, gamma, alpha):
@@ -83,13 +129,43 @@ class Neural:
         p_array[:,0]=numpy.hstack((state_mean[:,episode],action[:,episode]))
 
         # calculate present_q based on present state value
-        C, present_q = self.predict(p_array.T)
+        C, present_q = self.predict(p_array.T)#nn_val
 
-        q_teacher[:,episode] = present_q[0,0] + \
-                alpha*(reward[episode]+gamma*next_q-present_q[0,0])
-        q_array[:,0]=q_teacher[:,episode]
+        #if alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0])) >0:
+        q_teacher[:,episode] = nn2q(present_q[0,0]) + \
+                alpha*(50.0*(reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0]))
+
+        q_array[:,0]=q2nn(q_teacher[:,episode])
+        print('nn/next_q',gamma*nn2q(next_q),'present_q',nn2q(present_q[0,0]),'add',alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0])))
+
+        memo=numpy.zeros((1,2))
+        memo[0,0]=nn2q(present_q[0,0])
+        memo[0,1]=nn2q(next_q)
+        with open('next_q.csv', 'a') as f_handle:
+            numpy.savetxt(f_handle,memo,fmt="%.5f",delimiter=",",newline="\n")
 
         self.train(p_array.T,q_array)
+        print('nn_new_teacher',q_array[:,0],'pre_q',present_q)
+
+        ##for debug
+
+        #c, ans = self.predict(p_array.T)
+        #print('nncheck',q_array[:,0],ans)
+
+        ##for debug
+        possible_a = numpy.linspace(0,1,100)
+        p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
+        possible_q = numpy.zeros(100)
+        memo_q=numpy.zeros((1,100))
+
+        for i in range(100):
+            p_array[:,0]=numpy.hstack((state_mean[:,episode+1],possible_a[i]))
+            C, possible_q[i]=self.predict(p_array.T)
+
+        memo_q[0,:]=possible_q
+        with open('q_func_curve_after_learning.csv', 'a') as f_handle:
+            numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
+
         return q_teacher
 
     def predict_update(self, state_mean, state_predict,num_action, num_face, action, episode, p_teacher,
@@ -98,27 +174,14 @@ class Neural:
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
         q_array= numpy.zeros((self.output_size,1)) #to stock predicted argument
 
-        #p_array[:,0]=numpy.hstack((state_mean[:,episode+1]/num_face,
         p_array[:,0]=numpy.hstack((state_mean[:,episode+1],
             action[:,episode+1]))
-            #action[:,episode+1]/num_action))
         C, face_predict =self.predict(p_array.T)
         state_predict[0,:type_face] = face_predict
 
-        #p_input_array = numpy.zeros((self.input_size,episode))
-        #p_input_array = numpy.hstack((((state_mean[:,:episode])/num_face).T,
-            #(action[:,:episode]/num_action).T))
         p_teacher[:,episode] = state_mean[:type_face,episode]
         q_array[:,0]=p_teacher[:,episode]
 
-        #if episode>select_episode:
-            #p_selected_input, p_selected_teacher = select_teach(p_input_array,
-                    #p_teacher[:,:episode],episode)
-        #else:
-            #p_selected_input = p_input_array
-            #p_selected_teacher = p_teacher[:,:episode]
-
-        #self.train(p_selected_input,p_selected_teacher.T)
         self.train(p_array.T,q_array)
         return state_predict, p_teacher
 
@@ -165,6 +228,11 @@ class Neural:
 
 
 if __name__ == '__main__':
+
+    for i in numpy.linspace(-20,20,40):
+        print(i,q2nn(i))
+
+    raw_input()
 
     print('1')
     X = numpy.array([[2, 0.5,2], [0, 0.1,3], [1, 0,0.2], [1, 1,0.4]])
