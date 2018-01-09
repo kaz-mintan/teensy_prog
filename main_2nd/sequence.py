@@ -11,8 +11,9 @@ num_ir = 1
 # reward function
 def calc_reward(state, state_predict, state_before, time_window, mode):
     # coefficient
-    c = np.array([1.0,1.0,1.0,-1.0,-1.0]) #for delta mode
-    h = np.array([1.0,1.0,1.0,-1.0,-1.0]) #for heuristic mode
+
+    c = np.array([0,20.0,20.0,-20.0,-20.0]) #for delta mode
+    h = np.array([0,20.0,20.0,-20.0,-20.0]) #for heuristic mode
     reward = 0
 
     # extract face array (must be time sequence data)

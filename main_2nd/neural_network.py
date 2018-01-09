@@ -93,10 +93,10 @@ class Neural:
                 p_array[:,0]=numpy.hstack((state_mean[:,episode+1],possible_a[i]))
                 C, possible_q[i]=self.predict(p_array.T)
 
-            #plt.clf()
-            #plt.plot(possible_a, possible_q)
+            plt.clf()
+            plt.plot(possible_a, possible_q)
 
-            #plt.pause(0.01)
+            plt.pause(0.01)
 
             #print('nn_curve',possible_q[0],'---',possible_q[99])
 
@@ -133,7 +133,7 @@ class Neural:
 
         #if alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0])) >0:
         q_teacher[:,episode] = nn2q(present_q[0,0]) + \
-                alpha*(50.0*(reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0]))
+                alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0]))
 
         q_array[:,0]=q2nn(q_teacher[:,episode])
         print('nn/next_q',gamma*nn2q(next_q),'present_q',nn2q(present_q[0,0]),'add',alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0])))

@@ -153,7 +153,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     #print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode+1])
 
     state_before = state
-    print('')
+    print('type',target_type,target_direct,mode)
 
 save_file(num_episodes,action,target_type,target_direct,mode)
 
