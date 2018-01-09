@@ -4,6 +4,7 @@ import socket
 import sys
 import threading
 import binascii
+import numpy as np
 
 def react_formula(ir_value):
     sma_val=ir_value*1/3
@@ -23,13 +24,20 @@ class GetSensor:
         serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         serversock.bind((host,port)) #IPとPORTを指定してバインドします
         serversock.listen(10) #接続の待ち受けをします（キューの最大数を指定）
+        print('connecting')
 
-        clientsock, client_address = serversock.accept() #接続されればデータを格納
+        self.clientsock, self.client_address = serversock.accept() #接続されればデータを格納
+        print('connected')
 
-    def get_sensor():
-        rcvmsg = clientsock.recv(1024)
-        face = rcvmsg.split(",")
-        face_int = map(int,face[0:5])
+    def get_sensor(self, time_window):
+        num_face = 5
+        get_face = np.zeros(num_face)
+        for t in range(time_window):
+            rcvmsg = self.clientsock.recv(1024)
+            face = rcvmsg.split(",")
+            face_int = map(int,face[0:5])
+            face_np = np.array(face_int)
+            print(t,face_np)
 
         '''
         serial_data = ser.read()
@@ -55,7 +63,16 @@ class GetSensor:
                 #ここでちゃんと遅れてる？
                 #終了処理などちゃんとして？
 
+        #return np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
         return face_int, int_val
 
     def close():
         clientsock.close()
+
+if __name__ == "__main__" :
+
+    host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
+    port = 50000 #クライアントと同じPORTをしてあげます
+
+    get = GetSensor(host,port)
+    get.get_sensor(30)
