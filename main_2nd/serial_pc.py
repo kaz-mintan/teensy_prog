@@ -17,8 +17,7 @@ def react_formula(ir_value):
 class GetSensor:
     def __init__(self, host, port):
 
-        # シリアル通信の設定(
-        #ser = serial.serial("/dev/ttyacm0", 9600, timeout=1)
+        self.num_face = 5
 
         serversock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         serversock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -29,42 +28,34 @@ class GetSensor:
         self.clientsock, self.client_address = serversock.accept() #接続されればデータを格納
         print('connected')
 
+    def check_face(self,face_tmp_list):
+        face_int = map(int,face_tmp_list[0:5])
+        for i in range(self.num_face):
+            #print('face_tmp_list',face_tmp_list[i])
+            if face_int[i]<100 and face_int[i]>=0:
+                ret = 1
+            else:
+                ret = 0
+                break
+        return ret
+
+
+    #def get_sensor(self, time_window, queue):
     def get_sensor(self, time_window):
-        num_face = 5
-        get_face = np.zeros(num_face)
+        get_face = np.zeros(self.num_face)
+        facial = np.zeros((time_window,self.num_face))
+        ir_val = np.zeros((time_window,1))
+        num_array = 0
         for t in range(time_window):
             rcvmsg = self.clientsock.recv(1024)
             face = rcvmsg.split(",")
-            face_int = map(int,face[0:5])
-            face_np = np.array(face_int)
-            print(t,face_np)
+            if self.check_face(face) == 1:
+                face_int = map(int,face[0:5])
+                facial[num_array,:] = np.array(face_int)
+                num_array += 1
+                print(face_int)
 
-        '''
-        serial_data = ser.read()
-        if serial_data == 'H':
-            str_high = ser.read()
-            data_high=binascii.b2a_hex(str_high)
-            int_high=int(data_high,16)
-            str_low = ser.read()
-            data_low=binascii.b2a_hex(str_low)
-            int_low=int(data_low,16)
-            low = (int_low& 0xFF)
-            read_val = (int_high << 8|low)
-            int_val = int(read_val)
-        '''
-        int_val = 0
-
-        #read_data = recvThread()
-            #if read_val!= None:
-                #ここでちゃんと数値が垂れ流されてる？
-                #deg = react_formula(int_val)
-                #ser.write(chr(deg))
-                #ser.write(str(deg)+"\0")
-                #ここでちゃんと遅れてる？
-                #終了処理などちゃんとして？
-
-        #return np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
-        return face_int, int_val
+        array = np.hstack((facial,ir_val))
 
     def close():
         clientsock.close()
@@ -75,4 +66,4 @@ if __name__ == "__main__" :
     port = 50000 #クライアントと同じPORTをしてあげます
 
     get = GetSensor(host,port)
-    get.get_sensor(30)
+    get.get_sensor(300)
