@@ -40,8 +40,7 @@ class GetSensor:
         return ret
 
 
-    #def get_sensor(self, time_window, queue):
-    def get_sensor(self, time_window):
+    def get_sensor(self, time_window, queue):
         get_face = np.zeros(self.num_face)
         facial = np.zeros((time_window,self.num_face))
         ir_val = np.zeros((time_window,1))
