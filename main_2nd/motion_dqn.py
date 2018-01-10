@@ -9,6 +9,7 @@ from neural_network import *
 from datetime import datetime
 from serial_pc import *
 from save_action_fig import *
+from action_dummy import *
 
 import matplotlib.pyplot as plt
 
@@ -120,13 +121,20 @@ if mode == 'predict':
 
     P_func.train(p_first_iteacher.T,p_first_oteacher.T)
 
+# setting of serial com
+
+get_val = GetSensor(host,port)
+
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros_like(state_before)
+    para_num = 1
 
-    for t in range(1,t_window):  #roup for 1 time window
-        #state[:,t] = get_sensor()
-        state[:,t] = np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
+    exe_action(100*action[:,episode],para_num)
+
+    #for t in range(1,t_window):  #roup for 1 time window
+    state = get_val.get_sensor(t_window)
+        #state[:,t] = np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
 
     ### calcurate s_{t+1} based on the value of sensors
     state_mean[:,episode+1]=seq2feature(state)
