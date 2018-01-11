@@ -1,9 +1,27 @@
 # -*- coding: utf-8 -*-
 import serial
 
-# シリアル通信の設定(
-ser = serial.Serial("/dev/ttyACM0", 19200, timeout=1)
+#ser = serial.Serial("/dev/ttyACM0", 19200, timeout=1)
 
-while True:
-    deg =raw_input()
-    ser.write(str(deg)+'deg\0')
+class serial_sma:
+    def __init__(self, port, baud):
+        # シリアル通信の設定(
+        self.ser = serial.Serial(port, baud, timeout=1)
+
+    def send_val(self, send_pwm):
+        send_str = str(send_pwm)
+
+        self.ser.write(send_str+'deg\0')
+
+if __name__ == '__main__':
+    ser_port = "/dev/ttyACM0"
+    ser_baud = 19200
+
+    serial_test = serial_sma(ser_port,ser_baud)
+
+    while True:
+        print('input send_deg')
+        deg =raw_input()
+        serial_test.send_val(deg)
+        #ser.write(str(deg)+'deg\0')
+
