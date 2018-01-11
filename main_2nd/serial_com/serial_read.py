@@ -31,10 +31,4 @@ if __name__ == '__main__':
         #read_data = recvThread()
             if read_val!= None:
                 print(read_val)
-                #ここでちゃんと数値が垂れ流されてる？
-                #deg = react_formula(int_val)
-                #ser.write(deg)
-                #ser.write(str(deg)+"\0")
-                #ここでちゃんと遅れてる？
-                #終了処理などちゃんとして？
 
