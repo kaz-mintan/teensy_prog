@@ -4,7 +4,7 @@
 #define LED_PIN   13    //Pin # for on-board Teensy LED
 #define IR_PIN A0
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
-#define TIME_OFF  20    //In Seconds (At least 30s)
+#define TIME_OFF_CO  0.125    //In Seconds (At least 30s)
 
 // グローバル変数の宣言
 char input[4];  // 文字列格納用
@@ -54,7 +54,7 @@ void loop() {
     delay(TIME_ON * 1000); // SMA ON time (ms)
     analogWrite(SMA_PIN, 0);
     digitalWrite(LED_PIN, LOW);
-    delay(TIME_OFF * 1000); // SMA Cool time (ms)
+    delay(TIME_OFF_CO * 1000 * deg); // SMA Cool time (ms)
   }
 }
 
