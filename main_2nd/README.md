@@ -15,3 +15,19 @@
 
 		- actuate sma based on a value of pwm which is sent by serial communication.
 		- it may have time delay
+
+	- serial_read/serial_ir.ino
+
+		- output the value of ir sensor by serial communication.
+
+## communication components in PC
+
+- serial_com/
+
+		- serial_sma.py
+
+			- after running the serial_sma/serial_sma.ino, it can actuate the motion of the sma to input the value of pwm into your console.
+
+		- serial_read.py
+
+			- after runnning the serial_read/serial_ir.ino, it can get the value of the ir sensor which are sent by serial communication.
