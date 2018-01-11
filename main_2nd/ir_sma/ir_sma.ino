@@ -45,10 +45,10 @@ int serialNumVal() {
 
 // メインループ
 void loop() {
-  deg = Serial.read();
-  delay(100);
+  deg = serialNumVal();
+  Serial.println('a');
 
-  if (deg <= 60) {
+  if(deg>0){
     analogWrite(SMA_PIN, map(deg, 0, 100, 0, 255));
     digitalWrite(LED_PIN, HIGH);
     delay(TIME_ON * 1000); // SMA ON time (ms)
@@ -56,7 +56,6 @@ void loop() {
     digitalWrite(LED_PIN, LOW);
     delay(TIME_OFF * 1000); // SMA Cool time (ms)
   }
-
 }
 
 
