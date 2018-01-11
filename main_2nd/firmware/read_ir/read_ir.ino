@@ -6,13 +6,6 @@
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
 #define TIME_OFF  20    //In Seconds (At least 30s)
 
-// グローバル変数の宣言
-char input[4];  // 文字列格納用
-int i = 0;      // 文字数のカウンタ
-int val = 0;    // 受信した数値
-int deg = 0;    // サーボの角度
-int ir_value = 0;
-
 void setup() {
   // Declarations for Sensor and Actuator Pins
   pinMode(SMA_PIN, OUTPUT);
@@ -23,7 +16,17 @@ void setup() {
   Serial.begin(19200);
 }
 
+int i = 0;
+int ir_val = 0;
+
+
 // メインループ
 void loop() {
-  Serial.println(analogRead(IR_PIN));
+  ir_val = 0;
+  for (i=0 ; i < 100 ; i++) {
+    ir_val  = ir_val + analogRead(IR_PIN) ;   // 指定のアナログピン(0番端子)から読取ります
+  }
+  ir_val = ir_val/100.0;
+
+  Serial.println(ir_val);
 }
