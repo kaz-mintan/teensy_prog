@@ -2,6 +2,9 @@
 # http://neuro-educator.com/rl1/
 
 import numpy as np
+import matplotlib.pyplot as plt
+import sys
+
 from sequence import *
 from hand_motion import *
 from dummy_evaluator import *
@@ -10,15 +13,16 @@ from datetime import datetime
 from serial_pc import *
 from save_action_fig import *
 from action_dummy import *
+from actuate_sma import *
 
-import matplotlib.pyplot as plt
-
-
-import sys
+import threading
+import thread
+from Queue import Queue
+import time
 
 select_episode = 50
 
-t_window = 30  #number of time window
+t_window = 100  #number of time window
 num_episodes = 300  #number of all trials
 
 type_face = 5
@@ -123,18 +127,40 @@ if mode == 'predict':
 
 # setting of serial com
 
+ser_port = "/dev/ttyACM0"
+ser_baud = 19200
+ 
 get_val = GetSensor(host,port)
+sma_act = Serial_com(ser_port,ser_baud)
+#sma_act.action(deg)
 
 # main loop
+move_flg = 1
+
 for episode in range(num_episodes-1):  #repeat for number of trials
+    print('episode',episode,'action',action[:,episode])
     state = np.zeros_like(state_before)
     para_num = 1
 
-    exe_action(100*action[:,episode],para_num)
+    move_flg =1
+    #exe_action(100*action[:,episode],para_num)
+    deg = 60*action[:,episode]
+    sma_act.action(deg)
+    state = get_val.get_sensor(t_window)
+
+    #queue=Queue()
+    #th_face = threading.Thread(target=get_val.get_sensor,name="th_sma",args=(t_window,queue))
+    #th_face.start()
+
+
+    #print('time',deg/10.0)
+    #time.sleep(deg/10.0)
+    #print('action finished')
 
     #for t in range(1,t_window):  #roup for 1 time window
-    state = get_val.get_sensor(t_window)
-        #state[:,t] = np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
+    #th_face.join()
+    #state = queue.get()
+
 
     ### calcurate s_{t+1} based on the value of sensors
     state_mean[:,episode+1]=seq2feature(state)
