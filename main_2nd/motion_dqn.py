@@ -6,18 +6,18 @@ import matplotlib.pyplot as plt
 import sys
 
 from sequence import *
-from hand_motion import *
-from dummy_evaluator import *
+#from hand_motion import *
+#from dummy_evaluator import *
 from neural_network import *
-from datetime import datetime
+#from datetime import datetime
 from serial_pc import *
-from save_action_fig import *
-from action_dummy import *
+#from save_action_fig import *
+#from action_dummy import *
 from actuate_sma import *
 
-import threading
-import thread
-from Queue import Queue
+#import threading
+#import thread
+#from Queue import Queue
 import time
 
 select_episode = 50
