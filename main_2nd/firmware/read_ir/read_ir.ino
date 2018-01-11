@@ -18,6 +18,7 @@ void setup() {
 
 int i = 0;
 int ir_val = 0;
+int distance = 0;
 
 
 // メインループ
@@ -27,6 +28,7 @@ void loop() {
     ir_val  = ir_val + analogRead(IR_PIN) ;   // 指定のアナログピン(0番端子)から読取ります
   }
   ir_val = ir_val/100.0;
+  distance = 6762/(ir_val-9)-4;
 
-  Serial.println(ir_val);
+  Serial.println(distance);
 }
