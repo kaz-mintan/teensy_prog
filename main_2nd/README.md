@@ -28,6 +28,20 @@
 
 			- after running the serial_sma/serial_sma.ino, it can actuate the motion of the sma to input the value of pwm into your console.
 
+			- command: python serial_sma.py
+
 		- serial_read.py
 
 			- after runnning the serial_read/serial_ir.ino, it can get the value of the ir sensor which are sent by serial communication.
+
+			- command: python serial_read.py
+
+		- serial_double.py
+
+			- connect sma to '/dev/ttyACMO'
+
+			- connect ir to '/dev/ttyACM1'
+
+			- output the value of ir sensor continuously,
+
+			- when you input the value of pwm into bash, sma starts to move
