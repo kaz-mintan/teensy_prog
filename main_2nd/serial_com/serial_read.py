@@ -34,7 +34,8 @@ def conbine_high_low(str_high,str_low):
 
     read_val = (high << 8|low)
     int_val = int(read_val)
-    return int_val
+    if int_val > 0 and int_val < 80:
+        return int_val
 
 if __name__ == '__main__':
     ser_port = "/dev/ttyACM0"
