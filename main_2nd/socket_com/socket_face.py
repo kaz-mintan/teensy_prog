@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import socket
-import sys
-import threading
-import binascii
+#import sys
+#import threading
+#import binascii
 import numpy as np
 
 class GetSensor:
@@ -39,42 +39,15 @@ class GetSensor:
                 break
         return ret
 
-    def get_sensor_queue(self, time_window, queue):
+    def get_face(self):
         get_face = np.zeros(self.num_face)
-        facial = np.zeros((time_window,self.num_face))
-        ir_val = np.zeros((time_window,1))
-        num_array = 0
-        #for t in range(time_window):
-        while True:
-            rcvmsg = self.clientsock.recv(1024)
-            face = rcvmsg.split(",")
-            if self.check_face(face) == 1:
-                face_int = map(int,face[0:5])
-                facial[num_array,:] = np.array(face_int)
-                num_array += 1
-                print(face_int)
-                if num_array > time_window:
-                    break
-
-        array = np.hstack((facial,ir_val))
-        queue.put(array.T)
-
-    def get_sensor(self, time_window):
-        get_face = np.zeros(self.num_face)
-        facial = np.zeros((time_window,self.num_face))
-        ir_val = np.zeros((time_window,1))
-        num_array = 0
-        for t in range(time_window):
-            rcvmsg = self.clientsock.recv(1024)
-            face = rcvmsg.split(",")
-            if self.check_face(face) == 1:
-                face_int = map(int,face[0:5])
-                print(face_int)
-                facial[t,:] = np.array(face_int)
-
-        array = np.hstack((facial,ir_val))
-        return array.T
-
+        rcvmsg = self.clientsock.recv(1024)
+        face = rcvmsg.split(",")
+        if self.check_face(face) == 1:
+            int_face = map(int,face[0:5])
+            get_face = np.array(int_face)
+            print(get_face)
+        return get_face
 
     def close():
         clientsock.close()
@@ -85,4 +58,5 @@ if __name__ == "__main__" :
     port = 50000 #クライアントと同じPORTをしてあげます
 
     get = GetSensor(host,port)
-    get.get_sensor(300)
+    while True:
+        get.get_face()
