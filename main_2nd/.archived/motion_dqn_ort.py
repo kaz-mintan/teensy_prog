@@ -2,26 +2,20 @@
 # http://neuro-educator.com/rl1/
 
 import numpy as np
-import matplotlib.pyplot as plt
-import sys
-
 from sequence import *
+from hand_motion import *
+from dummy_evaluator import *
 from neural_network import *
+from datetime import datetime
 from serial_pc import *
-#from actuate_sma import *
 
-from get_face_ir import *
-from serial_com import serial_sma
 
-#import threading
-#import thread
-#from Queue import Queue
-import time
+import sys
 
 select_episode = 50
 
-t_window = 100  #number of time window
-num_episodes = 300  #number of all trials
+t_window = 30  #number of time window
+num_episodes = 500  #number of all trials
 
 type_face = 5
 type_ir = 1
@@ -41,23 +35,44 @@ epoch = 1000
 val_max = 0.8
 val_min = 0.2
 
-soc_host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
-soc_port = 50000 #クライアントと同じPORTをしてあげます
+host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
+port = 50000 #クライアントと同じPORTをしてあげます
 
-#ser_port_ir = "/dev/ttyACM1"
-ser_baud = 19200
+def nn2q(nn_q):
+    return 25.0*nn_q-12.5
 
-#ser_port_sma = "/dev/ttyACM0"
-#ser_baud_sma = 19200
+def q2nn(q):
+    return 0.04*q+0.5
 
+def normalization(array, val_max, val_min):
+    x_max = np.max(array)
+    x_min = np.min(array)
+    a = (val_max - val_min)/(x_max - x_min)
+    b = -a*x_max + val_max
+    return (a, b)
+
+def inv_normalization(a, b, norm_q):
+    return (norm_q - b)/a
+
+def volts(q_teacher, q_k, T=1):
+    exp_1=np.sum(np.exp(q_teacher/T))
+    exp_2=np.exp(q_k/T)
+    return exp_2/exp_1
+
+def select_teach(input_array, q_teacher,episode,num=select_episode):
+    index_array = np.argsort(q_teacher)[::-1]
+    selected_input = input_array[index_array]
+    selected_output = np.sort(q_teacher)[::-1]
+    with open('selected_q_index.csv', 'a') as f_handle:
+        np.savetxt(f_handle,index_array)
+
+    return selected_input[0,:num,:], selected_output[:,:num]
 
 #5 [4] start main function. set parameters
 argvs = sys.argv
-mode = argvs[1]
-ser_port_sma = argvs[2]
-ser_port_ir = argvs[3]
-print('port_sma',ser_port_sma)
-print('port_ir',ser_port_ir)
+target_type = argvs[1]
+target_direct = argvs[2]
+mode = argvs[3]
 
 # [5] main tourine
 state = np.zeros((type_face+type_ir,t_window))
@@ -70,7 +85,7 @@ random = np.zeros(num_episodes)
 face_predict = np.zeros((1,type_face))
 q_predicted = np.zeros(num_episodes)
 
-state[:,0] = np.array([1,0,0,0,0,0.50])
+state[:,0] = np.array([1,0,0,0,0,0.30])
 action[:,0] = np.random.uniform(0,1)
 
 possible_a = np.linspace(0,1,100)
@@ -78,11 +93,15 @@ possible_a = np.linspace(0,1,100)
 ## set qfunction as nn
 q_input_size = type_face + type_ir + type_action
 q_output_size = 1
-q_hidden_size = (q_input_size + q_output_size )/2
+q_hidden_size = (q_input_size + q_output_size )/3
 
 q_teacher = np.zeros((q_output_size,num_episodes))
 
 Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch)
+q_first_iteacher = np.random.uniform(low=0,high=0.01,size=(q_input_size,1))
+q_first_oteacher = np.random.uniform(low=0,high=0.01,size=(q_output_size,1))
+
+Q_func.train(q_first_iteacher.T,q_first_oteacher.T)
 
 if mode == 'predict':
     ## set predict function as nn
@@ -98,51 +117,24 @@ if mode == 'predict':
 
     P_func.train(p_first_iteacher.T,p_first_oteacher.T)
 
-# setting of serial com
-get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
-sma_act = serial_sma.Act_sma(ser_port_sma,ser_baud)
-deg = 80
-sma_act.act(deg)
-
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
-    print('episode',episode,'action',action[:,episode])
     state = np.zeros_like(state_before)
-    para_num = 1
 
-    #exe_action(100*action[:,episode],para_num)
-    deg = 30*action[:,episode]+70
-    sma_act.act(deg)
-    for t in range(1,t_window):
-        state[:,t] = get_val.ret_state()
-        print('state',state[:,t])
-
-    #queue=Queue()
-    #th_face = threading.Thread(target=get_val.get_sensor,name="th_sma",args=(t_window,queue))
-    #th_face.start()
-
-
-    #print('time',deg/10.0)
-    #time.sleep(deg/10.0)
-    #print('action finished')
-
-    #for t in range(1,t_window):  #roup for 1 time window
-    #th_face.join()
-    #state = queue.get()
-
+    for t in range(1,t_window):  #roup for 1 time window
+        #state[:,t] = get_sensor()
+        state[:,t] = np.hstack((get_face(action[:,episode],argvs[1],argvs[2],t,t_window),get_ir(state[type_face,t-1])))
 
     ### calcurate s_{t+1} based on the value of sensors
     state_mean[:,episode+1]=seq2feature(state)
 
     ### calcurate r_{t}
-    reward[episode+1] = calc_reward(state, state_predict,
+    reward[episode] = calc_reward(state, state_predict,
             state_before,t_window, mode)
-    print('acted',action[:,episode],'reward',reward[episode+1])
 
     ### calcurate a_{t+1} based on s_{t+1}
-    random_rate = 0.4# * (1 / (episode + 1))
     random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
-            num_action, num_face, state_mean, episode,random_rate,action,reward,alpha)
+            num_action, num_face, state_mean, episode)
 
     q_predicted[episode]=next_q
     q_teacher = Q_func.update(state_mean,num_action,num_face,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
@@ -153,11 +145,12 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                 select_episode, gamma, alpha)
 
     before_state = state[:,t_window-1]
-    #print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode+1])
+    #acted = action[:,episode+1]
+    #rewed = reward[episode]
+    print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode])
 
     state_before = state
-
-save_file(num_episodes,action,target_type,target_direct,mode)
+    print('q_val',q_teacher[:,episode])
 
 np.savetxt('action_pwm.csv', action[0,:], fmt="%.3f", delimiter=",")
 np.savetxt('reward_seq.csv', reward, fmt="%.5f",delimiter=",")

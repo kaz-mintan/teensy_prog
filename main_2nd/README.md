@@ -1,26 +1,53 @@
-# rainforce learning program
+# develop branch to debug!
 
-## main program
-- motion_dqn.py
+## hardware components
+- firmware/
 
-	- is main program.
-	- output possible appropriate parameters of motion.
-	- uses some modules as below,
+	- sma_act/sma_act.ino
 
-		- neural_network.py
-			- as a Q function
-			- and to predict the next facial expression based on the information of state.
+		- without serial communication, it actuate a sma.
 
-		- reward_function.py
-			- to calculate reward based on the gained facial expression and other information( ex. error of prediction facial expression)
+	- read_ir/read_ir.ino
 
-		- sequence.py
-			- to calculate the features of time sequence data of facial expression and ir sensor.
+		- without serial communication, it read the value of ir sensor
 
-## simulation mode
-- in a simlation mode, motion_dqn.py uses the modules which are shown below.
+	- serial_sma/serial_sma.ino
 
-	- dummy_evaluator.py
-		- to get dummy facial expression as an evaluator.
-	- hand_motion.py
-		- to get dummy information of ir sensor.
+		- actuate sma based on a value of pwm which is sent by serial communication.
+		- it may have time delay
+
+	- serial_read/serial_ir.ino
+
+		- output the value of ir sensor by serial communication.
+
+## communication components in PC
+
+- serial_com/
+
+	- serial_sma.py
+
+		- after running the serial_sma/serial_sma.ino, it can actuate the motion of the sma to input the value of pwm into your console.
+
+		- command: python serial_sma.py
+
+	- serial_read.py
+
+		- after runnning the serial_read/serial_ir.ino, it can get the value of the ir sensor which are sent by serial communication.
+
+		- command: python serial_read.py
+
+	- serial_double.py
+
+		- connect sma to '/dev/ttyACMO'
+
+		- connect ir to '/dev/ttyACM1'
+
+		- output the value of ir sensor continuously,
+
+		- when you input the value of pwm into bash, sma starts to move
+
+- socket_com/
+
+	- socket_face.py
+
+		- receive the value of facial expressions by socket communication
