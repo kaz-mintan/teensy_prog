@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 import socket
-#import sys
-#import threading
-#import binascii
 import numpy as np
 
-class GetSensor:
+class Get_face:
     def __init__(self, host, port):
 
         self.num_face = 5
@@ -39,7 +36,7 @@ class GetSensor:
                 break
         return ret
 
-    def get_face(self):
+    def read_face(self):
         get_face = np.zeros(self.num_face)
         rcvmsg = self.clientsock.recv(1024)
         face = rcvmsg.split(",")
@@ -57,6 +54,6 @@ if __name__ == "__main__" :
     host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
     port = 50000 #クライアントと同じPORTをしてあげます
 
-    get = GetSensor(host,port)
+    get = Get_face(host,port)
     while True:
-        get.get_face()
+        get.read_face()
