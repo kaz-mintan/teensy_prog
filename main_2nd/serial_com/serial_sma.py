@@ -8,7 +8,7 @@ class Act_sma:
         # シリアル通信の設定(
         self.ser = serial.Serial(port, baud, timeout=1)
 
-    def send_val(self, send_pwm):
+    def act(self, send_pwm):
         send_str = str(send_pwm)
 
         self.ser.write(send_str+'deg\0')
@@ -22,6 +22,6 @@ if __name__ == '__main__':
     while True:
         print('input send_deg')
         deg =raw_input()
-        serial_test.send_val(deg)
+        serial_test.act(deg)
         #ser.write(str(deg)+'deg\0')
 
