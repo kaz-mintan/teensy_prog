@@ -39,8 +39,8 @@ class serial_both:
                 read_val = self.conbine_high_low(str_high,str_low)
                 self.ser.flushInput()
                 if read_val!= None:
-                    print(read_val)
-                    #return read_val
+                    #print(read_val)
+                    return read_val
 
 if __name__ == '__main__':
     ser_port = "/dev/ttyACM0"
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     read_ir = th_rcv.start()
 
     while True:
-        print('input send_deg')
+        #print('input send_deg')
         deg =raw_input()
         serial_test.send_val(deg)
         #ser.write(str(deg)+'deg\0')
