@@ -4,6 +4,10 @@
 
 	- sma_keep/ to keep for seconds input pwm to sma
 
+	- sma_delay/ to start to actuate sma before the delay time ends
+
+		- when the led on the teensy board is on, the sma is waiting.
+
 	- serial_ir/ is to read single ir sensor and send the data with serial com
 
 # for sma actuator
@@ -17,7 +21,6 @@
 	- read_5ir/ to read 5 ir sensor values
 
 
-	- sma_delay/ to start to actuate sma before the delay time ends
 
 	- 5sma_act/ to act 5 sma
 
