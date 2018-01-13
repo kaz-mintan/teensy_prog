@@ -43,7 +43,7 @@ class Get_face:
         if self.check_face(face) == 1:
             int_face = map(int,face[0:5])
             get_face = np.array(int_face)
-            print(get_face)
+            #print(get_face)
         return get_face
 
     def close():
