@@ -5,6 +5,8 @@ import sys
 import threading
 import binascii
 
+import sys
+
 class Serial_read:
     def __init__(self, port, baud):
         # シリアル通信の設定(
@@ -33,12 +35,15 @@ class Serial_read:
                 read_val = self.conbine_high_low(str_high,str_low)
                 self.ser.flushInput()
                 if read_val!= None:
-                    print read_val
+                    #print read_val
                     return read_val
 
 if __name__ == '__main__':
-    ser_port = "/dev/ttyACM0"
+    #ser_port = "/dev/ttyACM1"
     ser_baud = 19200
+
+    argvs = sys.argv
+    ser_port = argvs[1]
 
     serial_test = Serial_read(ser_port,ser_baud)
     while True:
