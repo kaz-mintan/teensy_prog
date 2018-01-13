@@ -5,11 +5,9 @@ import sys
 import threading
 import binascii
 
-#self.ser = serial.Serial("/dev/ttyACM0", 19200, timeout=1)
-
-# シリアル通信の設定(
-class serial_read:
+class Serial_read:
     def __init__(self, port, baud):
+        # シリアル通信の設定(
         self.ser = serial.Serial(port, baud, timeout=1)
 
     def conbine_high_low(self, str_high,str_low):
@@ -35,13 +33,14 @@ class serial_read:
                 read_val = self.conbine_high_low(str_high,str_low)
                 self.ser.flushInput()
                 if read_val!= None:
+                    print read_val
                     return read_val
 
 if __name__ == '__main__':
     ser_port = "/dev/ttyACM0"
     ser_baud = 19200
 
-    serial_test = serial_read(ser_port,ser_baud)
+    serial_test = Serial_read(ser_port,ser_baud)
     while True:
         val = serial_test.read_val()
         print(val)
