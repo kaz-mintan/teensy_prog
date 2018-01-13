@@ -2,6 +2,8 @@
 
 	- read_ir/ is just to read single ir sensor value with only teensy board
 
+	- sma_keep/ to keep for seconds input pwm to sma
+
 	- serial_ir/ is to read single ir sensor and send the data with serial com
 
 # for sma actuator
@@ -14,7 +16,6 @@
 
 	- read_5ir/ to read 5 ir sensor values
 
-	- sma_keep/ to keep input pwm to sma
 
 	- sma_delay/ to start to actuate sma before the delay time ends
 
