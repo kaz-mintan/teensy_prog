@@ -1,5 +1,3 @@
-# develop branch to debug!
-
 ## hardware components
 - firmware/
 
