@@ -17,6 +17,8 @@ from serial_com import serial_sma
 #from Queue import Queue
 import time
 
+from datetime import datetime
+
 t_window = 100  #number of time window
 num_episodes = 300  #number of all trials
 
@@ -45,16 +47,19 @@ print('port_ir',ser_port_ir)
 
 # [5] main tourine
 state = np.zeros((type_face+type_ir,t_window))
-state_before = np.zeros_like(state)
-state_predict = np.zeros_like(state)
 state_mean = np.zeros((type_face+type_ir,num_episodes))
+
+state_before = np.zeros_like(state) #for delta mode
+state_predict = np.zeros_like(state) #for predict mode
+
 action = np.zeros((1,num_episodes))
 reward = np.zeros(num_episodes)
 random = np.zeros(num_episodes)
-face_predict = np.zeros((1,type_face))
+
+face_predict = np.zeros((1,type_face)) #for predict mode
 q_predicted = np.zeros(num_episodes)
 
-state[:,0] = np.array([1,0,0,0,0,0.50])
+#state[:,0] = np.array([1,0,0,0,0,0.50])
 action[:,0] = np.random.uniform(0,1)
 
 possible_a = np.linspace(0,1,100)
@@ -72,7 +77,7 @@ if mode == 'predict':
     ## set predict function as nn
     p_input_size = type_face + type_ir + type_action
     p_output_size = type_face
-    p_hidden_size = (q_input_size + q_output_size )/3
+    p_hidden_size = (p_input_size + p_output_size )/3
 
     p_teacher = np.zeros((p_output_size,num_episodes))
 
@@ -85,9 +90,6 @@ if mode == 'predict':
 # setting of serial com
 get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
 sma_act = serial_sma.Act_sma(ser_port_sma,ser_baud)
-deg = 80
-sma_act.act(deg)
-
 
 thre = 10
 
@@ -118,21 +120,16 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         random_rate = 0.4# * (1 / (episode + 1))
         random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
                 state_mean, episode,random_rate,action,reward,alpha)
-                #num_action, state_mean, episode,random_rate,action,reward,alpha)
 
         q_predicted[episode]=next_q
-        #q_teacher = Q_func.update(state_mean,num_action,num_face,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
         q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
 
         if mode == 'predict':
-            #state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,num_action,
             state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,
                     action, episode,p_teacher,reward,next_q,
                     gamma, alpha)
 
-        before_state = state[:,t_window-1]
-        #print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode+1])
-
+        #before_state = state[:,t_window-1]
         state_before = state
 
 save_file(num_episodes,action,target_type,target_direct,mode)
