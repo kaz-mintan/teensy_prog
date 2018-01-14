@@ -23,7 +23,7 @@ num_episodes = 300  #number of all trials
 
 type_face = 5
 type_ir = 5 #5 ir sensors
-type_action = 15 #3(pwm,keep,delay) times 5 sma sensors
+type_action = 3 #3(pwm,keep,delay) times 5 sma sensors
 
 gamma = 0.9
 alpha = 0.5
@@ -51,26 +51,22 @@ state_mean = np.zeros((type_face+type_ir,num_episodes))
 state_before = np.zeros_like(state) #for delta mode
 state_predict = np.zeros_like(state) #for predict mode
 
-action = np.zeros((1,num_episodes))
+action = np.zeros((type_action,num_episodes))
 reward = np.zeros(num_episodes)
 random = np.zeros(num_episodes)
 
-face_predict = np.zeros((1,type_face)) #for predict mode
 q_predicted = np.zeros(num_episodes)
 
-#state[:,0] = np.array([1,0,0,0,0,0.50])
-action[:,0] = np.random.uniform(0,1)
-
+#initialize action
+action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
 possible_a = np.linspace(0,1,100)
 
 ## set qfunction as nn
 q_input_size = type_face + type_ir + type_action
 q_output_size = 1
 q_hidden_size = (q_input_size + q_output_size )/2
-
 q_teacher = np.zeros((q_output_size,num_episodes))
-
-Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch)
+Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch, gamma, alpha)
 
 if mode == 'predict':
     ## set predict function as nn
@@ -80,7 +76,7 @@ if mode == 'predict':
 
     p_teacher = np.zeros((p_output_size,num_episodes))
 
-    P_func = Neural(p_input_size, p_hidden_size, p_output_size, epsilon, mu, epoch)
+    P_func = Neural(p_input_size, p_hidden_size, p_output_size, epsilon, mu, epoch,gamma, alpha)
     p_first_iteacher = np.random.uniform(low=0,high=1,size=(p_input_size,1))
     p_first_oteacher = np.random.uniform(low=0,high=1,size=(p_output_size,1))
 
@@ -94,24 +90,29 @@ thre = 10
 
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
+
     print('episode',episode,'action',action[:,episode])
     state = np.zeros_like(state_before)
     para_num = 1
 
     wait = True
-    thre = action[]
-    wait_time = action[]
+    thre = 0.5
+    wait_time = 0.1
 
     while wait:
         state[:,t]=get_val.ret_state()#TODO
         if state[:,t]>thre:
             sleep(wait_time)
             wait = False
+
     # if the sensor is larger than the value of threshold, sma starts to move
-    #if state > thre:#TODO decide the val of thre
-    deg = 30*action[:,episode]+70
-    sma_act.act(deg)
-    t_window = action[]に基づき決定する
+    state_mean[:,episode] = get_state_mean()#TODO
+    random_rate = 0.4# * (1 / (episode + 1))
+    ### calcurate a_{t} based on s_{t}
+    random[episode], action[:,episode], next_q = test_gen_action(possible_a, state_mean, episode, random_rate)
+    sma_act.act(action[:,episode])
+
+    t_window = 100#action[]に基づき決定する
     for t in range(1,t_window):
         state_reward[:,t] = get_val.ret_state()
         print('state',state[:,t])
@@ -124,18 +125,17 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             state_before,t_window, mode)
     print('acted',action[:,episode],'reward',reward[episode+1])
 
-    ### calcurate a_{t+1} based on s_{t+1}
-    random_rate = 0.4# * (1 / (episode + 1))
-    random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
-            state_mean, episode,random_rate,action,reward,alpha)
+    #random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
+            #state_mean, episode,random_rate,action,reward,alpha)
 
     q_predicted[episode]=next_q
-    q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
+    q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q)
+    #q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
 
     if mode == 'predict':
         state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,
-                action, episode,p_teacher,reward,next_q,
-                gamma, alpha)
+                action, episode,p_teacher,reward,next_q)
+                #action, episode,p_teacher,reward,next_q, gamma, alpha)
 
     #before_state = state[:,t_window-1]
     state_before = state

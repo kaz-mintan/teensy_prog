@@ -32,7 +32,7 @@ def rew_q2nn(rew):
 class Neural:
 
     # constructor
-    def __init__(self, n_input, n_hidden, n_output, epsilon, mu, epoch):
+    def __init__(self, n_input, n_hidden, n_output, epsilon, mu, epoch, gamma, alpha):
         self.hidden_weight = numpy.random.random_sample((n_hidden, n_input + 1))
         self.output_weight = numpy.random.random_sample((n_output, n_hidden + 1))
         self.hidden_momentum = numpy.zeros((n_hidden, n_input + 1))
@@ -42,6 +42,9 @@ class Neural:
         self.epsilon = epsilon
         self.mu = mu
         self.epoch = epoch
+
+        self.gamma = gamma
+        self.alpha = alpha
 
         self.input_size = n_input
         self.output_size = n_output
@@ -99,8 +102,6 @@ class Neural:
 
         return random, selected_action, next_q
 
-
-
     #def gen_action(self, possible_a, num_action, num_face, state_mean, episode,random_rate,action,reward,alpha):
     def gen_action(self, possible_a, state_mean, episode,random_rate,action,reward,alpha):
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
@@ -141,6 +142,7 @@ class Neural:
     #def update(self, state_mean, num_action, num_face, action, episode, q_teacher,
     def update(self, state_mean, action, episode, q_teacher,
             reward, next_q, gamma, alpha):
+            #reward, next_q, gamma, alpha):
 
         # set input_array to predict
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
@@ -152,7 +154,7 @@ class Neural:
 
         #if alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0])) >0:
         q_teacher[:,episode] = nn2q(present_q[0,0]) + \
-                alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0]))
+                self.alpha*((reward[episode+1])+self.gamma*nn2q(next_q)-nn2q(present_q[0,0]))
 
         q_array[:,0]=q2nn(q_teacher[:,episode])
 
@@ -162,7 +164,8 @@ class Neural:
 
     #def predict_update(self, state_mean, state_predict,num_action, num_face, action, episode, p_teacher,
     def predict_update(self, state_mean, state_predict, action, episode, p_teacher,
-            reward, next_q, gamma, alpha):
+            reward, next_q):
+            #reward, next_q, gamma, alpha):
 
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
         q_array= numpy.zeros((self.output_size,1)) #to stock predicted argument
