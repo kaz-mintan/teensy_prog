@@ -4,7 +4,6 @@ import random
 import matplotlib.pyplot as plt
 
 #from matplotlib import pyplot
-select_episode = 10
 type_face = 5
 
 def nn2q(nn_q):
@@ -125,7 +124,7 @@ class Neural:
 
     #def update(self, state_mean, num_action, num_face, action, episode, q_teacher,
     def update(self, state_mean, action, episode, q_teacher,
-            reward, next_q, select_episode, gamma, alpha):
+            reward, next_q, gamma, alpha):
 
         # set input_array to predict
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
@@ -174,7 +173,7 @@ class Neural:
 
     #def predict_update(self, state_mean, state_predict,num_action, num_face, action, episode, p_teacher,
     def predict_update(self, state_mean, state_predict, action, episode, p_teacher,
-            reward, next_q, select_episode, gamma, alpha):
+            reward, next_q, gamma, alpha):
 
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
         q_array= numpy.zeros((self.output_size,1)) #to stock predicted argument

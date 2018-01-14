@@ -17,18 +17,12 @@ from serial_com import serial_sma
 #from Queue import Queue
 import time
 
-select_episode = 50
-
 t_window = 100  #number of time window
 num_episodes = 300  #number of all trials
 
 type_face = 5
 type_ir = 5 #5 ir sensors
 type_action = 15 #3(pwm,keep,delay) times 5 sma sensors
-
-num_face = 100 #%
-num_ir = 100 #5mm
-num_action = 100 #%:pwm
 
 gamma = 0.9
 alpha = 0.5
@@ -39,13 +33,7 @@ epoch = 1000
 
 soc_host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
 soc_port = 50000 #クライアントと同じPORTをしてあげます
-
-#ser_port_ir = "/dev/ttyACM1"
 ser_baud = 19200
-
-#ser_port_sma = "/dev/ttyACM0"
-#ser_baud_sma = 19200
-
 
 #5 [4] start main function. set parameters
 argvs = sys.argv
@@ -134,13 +122,13 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
         q_predicted[episode]=next_q
         #q_teacher = Q_func.update(state_mean,num_action,num_face,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
-        q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
+        q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
 
         if mode == 'predict':
             #state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,num_action,
             state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,
                     action, episode,p_teacher,reward,next_q,
-                    select_episode, gamma, alpha)
+                    gamma, alpha)
 
         before_state = state[:,t_window-1]
         #print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode+1])
