@@ -117,25 +117,31 @@ void send_all(int pwm_input,int keep,int delay_time){
 // メインループ
 void loop() {
   //deg = serialNumVal();
-	int pwm_input = 15;
-	int keep = 3;
-	int delay_time = 1;
-     act_sma(pin_no[0], 50);  
-     stop_sma(pin_no[0]);
-     act_sma(pin_no[4], 50);  
-     stop_sma(pin_no[4]);
 
-  int test_i = 0;
-  for(test_i=0;test_i<5;test_i++){
-    act_sma(i,pwm_input);
-  }
-  for(test_i=0;test_i<5;test_i++){
-    stop_sma(i);
-  }
-  
-	send_all(pwm_input,keep,delay_time);
+	int pwm_input;
+	int keep;
+	int delay_time;
+	int test_i = 0;
 
- delay(10000);
+  start_str = serialNumVal();
+  if(start_str == 'H'){
+	pwm_input = serialNumVal();
+	keep = serialNumVal();
+	delay_time = serialNumVal();
+
+	if(pwm_input > 0){
+		for(test_i=0;test_i<5;test_i++){
+			act_sma(i,pwm_input);
+		}
+		for(test_i=0;test_i<5;test_i++){
+			stop_sma(i);
+		}
+
+		send_all(pwm_input,keep,delay_time);
+
+		delay(10000);
+	}
+  }
 
 }
 
