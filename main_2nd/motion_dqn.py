@@ -128,8 +128,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     #random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
             #state_mean, episode,random_rate,action,reward,alpha)
 
-    q_predicted[episode]=next_q
-    q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q)
+    q_predicted[episode-1]=next_q
+    q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
     #q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
 
     if mode == 'predict':

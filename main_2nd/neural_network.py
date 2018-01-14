@@ -103,14 +103,14 @@ class Neural:
         return random, selected_action, next_q
 
     #def gen_action(self, possible_a, num_action, num_face, state_mean, episode,random_rate,action,reward,alpha):
-    def gen_action(self, possible_a, state_mean, episode,random_rate,action,reward,alpha):
+    def gen_action(self, possible_a, state_mean, episode,random_rate,action,reward):
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
         q_array= numpy.zeros((self.output_size,1)) #to stock predicted argument
         possible_q = numpy.zeros(100)
 
         if episode == 0:
             p_array[:,0]=numpy.hstack((state_mean[:,episode],action[0,episode]))
-            q_array[:,0] = alpha*q2nn(reward[episode+1])
+            q_array[:,0] = self.alpha*q2nn(reward[episode+1])
             self.train(p_array.T,q_array.T)
 
             selected_action = numpy.random.uniform(0,1)
@@ -140,9 +140,8 @@ class Neural:
         return random, selected_action, next_q
 
     #def update(self, state_mean, num_action, num_face, action, episode, q_teacher,
-    def update(self, state_mean, action, episode, q_teacher,
-            reward, next_q, gamma, alpha):
-            #reward, next_q, gamma, alpha):
+    def update(self, state_mean, action, episode, q_teacher, reward, next_q):
+    #reward, next_q, gamma, alpha):
 
         # set input_array to predict
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
