@@ -12,9 +12,6 @@ from serial_pc import *
 from get_face_ir import *
 from serial_com import serial_sma
 
-#import threading
-#import thread
-#from Queue import Queue
 import time
 from datetime import datetime
 
@@ -54,8 +51,6 @@ state_predict = np.zeros_like(state) #for predict mode
 action = np.zeros((type_action,num_episodes))
 reward = np.zeros(num_episodes)
 random = np.zeros(num_episodes)
-
-q_predicted = np.zeros(num_episodes)
 
 #initialize action
 action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
@@ -112,7 +107,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     random[episode], action[:,episode], next_q = test_gen_action(possible_a, state_mean, episode, random_rate)
     sma_act.act(action[:,episode])
 
-    t_window = 100#action[]に基づき決定する
+    t_window = 100#TODO action[]に基づき決定する
     for t in range(1,t_window):
         state_reward[:,t] = get_val.ret_state()
         print('state',state[:,t])
@@ -128,7 +123,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     #random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
             #state_mean, episode,random_rate,action,reward,alpha)
 
-    q_predicted[episode-1]=next_q
     q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
     #q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
 
@@ -147,4 +141,3 @@ np.savetxt('reward_seq.csv', reward, fmt="%.5f",delimiter=",")
 np.savetxt('situation.csv', state_mean.T,fmt="%.2f", delimiter=",")
 np.savetxt('random_counter.csv', random,fmt="%.0f", delimiter=",")
 np.savetxt('q_value.csv', q_teacher,fmt="%.5f", delimiter=",")
-np.savetxt('q_predicted.csv', q_predicted,fmt="%.5f", delimiter=",")
