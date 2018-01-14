@@ -64,8 +64,6 @@ void stop_sma(int pin_no){
 void send_all(int pwm_input,int keep,int delay_time){
 	int i = 0;
 	unsigned long start_time = millis();
-  Serial.println("start time");
-  Serial.println(start_time);
 	int move_array[5]={0,0,0,0,0};
 
 	int stop_array[5]={keep*1000,
@@ -87,22 +85,18 @@ void send_all(int pwm_input,int keep,int delay_time){
 
 
   while(move_array[4]!=2){
-    Serial.println('b');
     now_time = millis();
 	  dt = now_time - start_time;
 
   	for(i = 0; i<5; i++){
   		if(move_array[i]==0){
   			if(dt>start_array[i]){
-          Serial.println("input");
           Serial.println(i);
   				act_sma(pin_no[i],pwm_input);
           move_array[i]=1;
   			}
   		}else if(move_array[i]==1){
   			if(dt>stop_array[i]){
-          Serial.println("stop");
-          Serial.println("i");
 
   				stop_sma(pin_no[i]);
   				move_array[i]=2;
@@ -123,7 +117,7 @@ void loop() {
 	int delay_time;
 	int test_i = 0;
 
-  start_str = serialNumVal();
+  start_str = serial.read();
   if(start_str == 'H'){
 	pwm_input = serialNumVal();
 	keep = serialNumVal();
