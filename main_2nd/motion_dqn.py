@@ -23,8 +23,8 @@ t_window = 100  #number of time window
 num_episodes = 300  #number of all trials
 
 type_face = 5
-type_ir = 1
-type_action = 1
+type_ir = 5 #5 ir sensors
+type_action = 15 #3(pwm,keep,delay) times 5 sma sensors
 
 num_face = 100 #%
 num_ir = 100 #5mm
@@ -36,9 +36,6 @@ alpha = 0.5
 epsilon = 0.1
 mu = 0.9
 epoch = 1000
-
-val_max = 0.8
-val_min = 0.2
 
 soc_host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
 soc_port = 50000 #クライアントと同じPORTをしてあげます
@@ -103,58 +100,52 @@ sma_act = serial_sma.Act_sma(ser_port_sma,ser_baud)
 deg = 80
 sma_act.act(deg)
 
+
+thre = 10
+
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
     print('episode',episode,'action',action[:,episode])
     state = np.zeros_like(state_before)
     para_num = 1
 
-    #exe_action(100*action[:,episode],para_num)
-    deg = 30*action[:,episode]+70
-    sma_act.act(deg)
-    for t in range(1,t_window):
-        state[:,t] = get_val.ret_state()
-        print('state',state[:,t])
+    state[:,t]=get_val#TODO
+    # if the sensor is larger than the value of threshold, sma starts to move
+    if state > thre:#TODO decide the val of thre
+        deg = 30*action[:,episode]+70
+        sma_act.act(deg)
+        for t in range(1,t_window):
+            state[:,t] = get_val.ret_state()
+            print('state',state[:,t])
 
-    #queue=Queue()
-    #th_face = threading.Thread(target=get_val.get_sensor,name="th_sma",args=(t_window,queue))
-    #th_face.start()
+        ### calcurate s_{t+1} based on the value of sensors
+        state_mean[:,episode+1]=seq2feature(state)
 
+        ### calcurate r_{t}
+        reward[episode+1] = calc_reward(state, state_predict,
+                state_before,t_window, mode)
+        print('acted',action[:,episode],'reward',reward[episode+1])
 
-    #print('time',deg/10.0)
-    #time.sleep(deg/10.0)
-    #print('action finished')
+        ### calcurate a_{t+1} based on s_{t+1}
+        random_rate = 0.4# * (1 / (episode + 1))
+        random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
+                state_mean, episode,random_rate,action,reward,alpha)
+                #num_action, state_mean, episode,random_rate,action,reward,alpha)
 
-    #for t in range(1,t_window):  #roup for 1 time window
-    #th_face.join()
-    #state = queue.get()
+        q_predicted[episode]=next_q
+        #q_teacher = Q_func.update(state_mean,num_action,num_face,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
+        q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
 
+        if mode == 'predict':
+            #state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,num_action,
+            state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,
+                    action, episode,p_teacher,reward,next_q,
+                    select_episode, gamma, alpha)
 
-    ### calcurate s_{t+1} based on the value of sensors
-    state_mean[:,episode+1]=seq2feature(state)
+        before_state = state[:,t_window-1]
+        #print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode+1])
 
-    ### calcurate r_{t}
-    reward[episode+1] = calc_reward(state, state_predict,
-            state_before,t_window, mode)
-    print('acted',action[:,episode],'reward',reward[episode+1])
-
-    ### calcurate a_{t+1} based on s_{t+1}
-    random_rate = 0.4# * (1 / (episode + 1))
-    random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
-            num_action, num_face, state_mean, episode,random_rate,action,reward,alpha)
-
-    q_predicted[episode]=next_q
-    q_teacher = Q_func.update(state_mean,num_action,num_face,action,episode,q_teacher,reward,next_q, select_episode, gamma, alpha)
-
-    if mode == 'predict':
-        state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,num_action,
-                num_face,action, episode,p_teacher,reward,next_q,
-                select_episode, gamma, alpha)
-
-    before_state = state[:,t_window-1]
-    #print('epi',episode,target_type,target_direct,mode,'ran',random[episode],'act',action[:,episode],'rwd',reward[episode+1])
-
-    state_before = state
+        state_before = state
 
 save_file(num_episodes,action,target_type,target_direct,mode)
 
