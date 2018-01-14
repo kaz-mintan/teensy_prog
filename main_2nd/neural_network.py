@@ -86,6 +86,7 @@ class Neural:
             random=0
             #next_q = 0#at this point
             p_array[:,0]=numpy.hstack((state_mean[:,episode+1],selected_action))
+            print('nn/p_array',p_array[:,0])
             C, next_q = self.predict(p_array.T)#at this point
 
         else:
@@ -93,10 +94,11 @@ class Neural:
                 p_array[:,0]=numpy.hstack((state_mean[:,episode+1],possible_a[i]))
                 C, possible_q[i]=self.predict(p_array.T)
 
-            plt.clf()
-            plt.plot(possible_a, possible_q)
+            #plt.clf()
+            #plt.title('q_function')
+            #plt.plot(possible_a, possible_q)
 
-            plt.pause(0.01)
+            #plt.pause(0.01)
 
             #print('nn_curve',possible_q[0],'---',possible_q[99])
 
@@ -114,9 +116,9 @@ class Neural:
 
             ##for debug
             memo_q[0,:]=possible_q
-            with open('q_func_curve.csv', 'a') as f_handle:
-                numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
-        print('epi',episode,'selected',selected_action,'random',random)
+            #with open('q_func_curve.csv', 'a') as f_handle:
+                #numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
+        print('epi',episode,'SELECTED',selected_action,'random',random)
 
         return random, selected_action, next_q
 
@@ -163,8 +165,8 @@ class Neural:
             C, possible_q[i]=self.predict(p_array.T)
 
         memo_q[0,:]=possible_q
-        with open('q_func_curve_after_learning.csv', 'a') as f_handle:
-            numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
+        #with open('q_func_curve_after_learning.csv', 'a') as f_handle:
+            #numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
 
         return q_teacher
 
