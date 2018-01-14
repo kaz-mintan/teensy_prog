@@ -16,7 +16,6 @@ from serial_com import serial_sma
 #import thread
 #from Queue import Queue
 import time
-
 from datetime import datetime
 
 t_window = 100  #number of time window
@@ -99,38 +98,47 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros_like(state_before)
     para_num = 1
 
-    state[:,t]=get_val#TODO
+    wait = True
+    thre = action[]
+    wait_time = action[]
+
+    while wait:
+        state[:,t]=get_val.ret_state()#TODO
+        if state[:,t]>thre:
+            sleep(wait_time)
+            wait = False
     # if the sensor is larger than the value of threshold, sma starts to move
-    if state > thre:#TODO decide the val of thre
-        deg = 30*action[:,episode]+70
-        sma_act.act(deg)
-        for t in range(1,t_window):
-            state[:,t] = get_val.ret_state()
-            print('state',state[:,t])
+    #if state > thre:#TODO decide the val of thre
+    deg = 30*action[:,episode]+70
+    sma_act.act(deg)
+    t_window = action[]に基づき決定する
+    for t in range(1,t_window):
+        state_reward[:,t] = get_val.ret_state()
+        print('state',state[:,t])
 
-        ### calcurate s_{t+1} based on the value of sensors
-        state_mean[:,episode+1]=seq2feature(state)
+    ### calcurate s_{t+1} based on the value of sensors
+    state_mean[:,episode+1]=seq2feature(state_reward)
 
-        ### calcurate r_{t}
-        reward[episode+1] = calc_reward(state, state_predict,
-                state_before,t_window, mode)
-        print('acted',action[:,episode],'reward',reward[episode+1])
+    ### calcurate r_{t}
+    reward[episode+1] = calc_reward(state, state_predict,
+            state_before,t_window, mode)
+    print('acted',action[:,episode],'reward',reward[episode+1])
 
-        ### calcurate a_{t+1} based on s_{t+1}
-        random_rate = 0.4# * (1 / (episode + 1))
-        random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
-                state_mean, episode,random_rate,action,reward,alpha)
+    ### calcurate a_{t+1} based on s_{t+1}
+    random_rate = 0.4# * (1 / (episode + 1))
+    random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
+            state_mean, episode,random_rate,action,reward,alpha)
 
-        q_predicted[episode]=next_q
-        q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
+    q_predicted[episode]=next_q
+    q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
 
-        if mode == 'predict':
-            state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,
-                    action, episode,p_teacher,reward,next_q,
-                    gamma, alpha)
+    if mode == 'predict':
+        state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,
+                action, episode,p_teacher,reward,next_q,
+                gamma, alpha)
 
-        #before_state = state[:,t_window-1]
-        state_before = state
+    #before_state = state[:,t_window-1]
+    state_before = state
 
 save_file(num_episodes,action,target_type,target_direct,mode)
 

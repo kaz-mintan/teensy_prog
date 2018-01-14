@@ -144,8 +144,8 @@ class Neural:
         memo=numpy.zeros((1,2))
         memo[0,0]=nn2q(present_q[0,0])
         memo[0,1]=nn2q(next_q)
-        with open('next_q.csv', 'a') as f_handle:
-            numpy.savetxt(f_handle,memo,fmt="%.5f",delimiter=",",newline="\n")
+        #with open('next_q.csv', 'a') as f_handle:
+            #numpy.savetxt(f_handle,memo,fmt="%.5f",delimiter=",",newline="\n")
 
         self.train(p_array.T,q_array)
         print('nn_new_teacher',q_array[:,0],'pre_q',present_q)
