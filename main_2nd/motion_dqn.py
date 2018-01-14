@@ -8,7 +8,6 @@ import sys
 from sequence import *
 from neural_network import *
 from serial_pc import *
-#from actuate_sma import *
 
 from get_face_ir import *
 from serial_com import serial_sma
