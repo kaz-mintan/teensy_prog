@@ -92,8 +92,6 @@ if mode == 'predict':
 #get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
 #sma_act = serial_sma.Act_sma(ser_port_sma,ser_baud)
 
-thre = 10
-
 state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
 
 def check_thre(ir_sensor,thre):
@@ -112,7 +110,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros((type_face+type_ir,1))
 
     wait = True
-    thre = 0.005
+    thre = 0.05
     wait_time = 0.1
 
     while_t = 1
