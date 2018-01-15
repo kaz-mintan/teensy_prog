@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import serial
 import sys
+import time
 
 #ser = serial.Serial("/dev/ttyACM0", 19200, timeout=1)
 
@@ -16,10 +17,11 @@ class Act_sma:
         self.ser.write(send_str+'\0')
 
     def send_para(self, pwm_input,keep,delay_time):
-        self.ser.write('H')
+        keep_val = int(float(keep)*10)
+        delay_val = int(float(delay_time)*10)
         self.act(pwm_input)
-        self.act(keep)
-        self.act(delay_time)
+        self.act(keep_val)
+        self.act(delay_val)
 
 if __name__ == '__main__':
     #ser_port = "/dev/ttyACM0"
@@ -37,6 +39,8 @@ if __name__ == '__main__':
         keep = raw_input()
         print('input delay')
         delay = raw_input()
+
+
         serial_test.send_para(pwm,keep,delay)
         #serial_test.act(deg)
         #ser.write(str(deg)+'deg\0')
