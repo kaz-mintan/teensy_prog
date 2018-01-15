@@ -88,22 +88,24 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     print('episode',episode,'action',action[:,episode])
     state = np.zeros_like(state_before)
-    para_num = 1
 
     wait = True
     thre = 0.5
     wait_time = 0.1
 
+    while_t = 0
     while wait:
-        state[:,t]=get_val.ret_state()#TODO
-        if state[:,t]>thre:
+        state[:,while_t]=get_val.ret_state()#TODO
+        while_t+ = 1
+        if state[:,while_t]>thre:
             sleep(wait_time)
             wait = False
 
     # if the sensor is larger than the value of threshold, sma starts to move
     state_mean[:,episode] = get_state_mean()#TODO
-    random_rate = 0.4# * (1 / (episode + 1))
+
     ### calcurate a_{t} based on s_{t}
+    random_rate = 0.4# * (1 / (episode + 1))
     random[episode], action[:,episode], next_q = test_gen_action(possible_a, state_mean, episode, random_rate)
     sma_act.act(action[:,episode])
 
