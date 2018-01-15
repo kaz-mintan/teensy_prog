@@ -20,10 +20,11 @@ from dummy_modules import dummy_evaluator
 from dummy_modules import hand_motion
 from test_linear import *
 
-
+from save_files import *
+from datetime import datetime
 
 t_window = 10  #number of time window
-num_episodes = 10  #number of all trials
+num_episodes = 50  #number of all trials
 
 type_face = 5
 type_ir = 5 #5 ir sensors
@@ -65,7 +66,6 @@ random = np.zeros(num_episodes)
 action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
 possible_a = np.linspace(0,1,10)
 print('shape',possible_a.shape[0])
-raw_input()
 
 ## set qfunction as nn
 q_input_size = type_face + type_ir + type_action
@@ -92,21 +92,14 @@ if mode == 'predict':
 #get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
 #sma_act = serial_sma.Act_sma(ser_port_sma,ser_baud)
 
-state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
+#for save files
+save_files = Save_csv(datetime.now())
 
-def check_thre(ir_sensor,thre):
-    ret = -1
-    for i in range(type_ir):
-        if ir_sensor[i]>thre:
-            ret = 1
-        else:
-            ret = 0
-    return ret
+state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
 
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
 
-    print('episode',episode,'action',action[:,episode])
     state = np.zeros((type_face+type_ir,1))
 
     wait = True
@@ -133,7 +126,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     # if the sensor is larger than the value of threshold, sma starts to move
     #state_mean[:,episode] = get_state_mean()#TODO
-    state_mean[:,episode] = linear_state(state)#TODO
+    state_mean[:,episode] = linear_state(state.T)#TODO
 
     ### calcurate a_{t} based on s_{t}
     random_rate = 0.4# * (1 / (episode + 1))
@@ -171,10 +164,3 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     #before_state = state[:,t_window-1]
     state_before = state
 
-save_file(num_episodes,action,target_type,target_direct,mode)
-
-np.savetxt('action_pwm.csv', action[0,:], fmt="%.3f", delimiter=",")
-np.savetxt('reward_seq.csv', reward, fmt="%.5f",delimiter=",")
-np.savetxt('situation.csv', state_mean.T,fmt="%.2f", delimiter=",")
-np.savetxt('random_counter.csv', random,fmt="%.0f", delimiter=",")
-np.savetxt('q_value.csv', q_teacher,fmt="%.5f", delimiter=",")

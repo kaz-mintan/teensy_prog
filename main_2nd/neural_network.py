@@ -2,12 +2,13 @@ import numpy
 import math
 import random
 import matplotlib.pyplot as plt
+import itertools
 
 #from matplotlib import pyplot
 type_face = 5
 
 def argmax_ndim(arg_array):
-    return np.unravel_index(arg_array.argmax(), arg_array.shape)
+    return numpy.unravel_index(arg_array.argmax(), arg_array.shape)
 
 def nn2q(nn_q):
     changed_q = 25.0*nn_q-12.5
@@ -77,30 +78,40 @@ class Neural:
         return (C, Y)
 
     def test_gen_action(self, possible_a, state_mean, episode,random_rate):
-        possible_q = numpy.zeros((100,100,100))
+        p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
+        #possible_q = numpy.zeros((100,100,100))
+        possible_q = numpy.zeros((possible_a.shape[0],possible_a.shape[0],possible_a.shape[0]))
+        ret_random = 0
+        ret_action = numpy.array([0,0,0])
+        next_q = 0
+        dim_num = 3
+        val = float(possible_a.shape[0])
         if episode != 0:
-            for a,b,c in itertools.product(range(100),repeat=dim_num):
+            for a,b,c in itertools.product(range(possible_a.shape[0]),repeat=dim_num):
                 array = numpy.hstack((possible_a[a],possible_a[b],possible_a[c]))
 
                 p_array[:,0]=numpy.hstack((state_mean[:,episode+1],array))
                 C, possible_q[a,b,c]=self.predict(p_array.T)
 
             if random_rate <= numpy.random.uniform(0, 1):
-                random=1#maximize
+                ret_random=1#maximize
                 action_a,action_b,action_c=argmax_ndim(possible_q)
-                selected_action = numpy.array([action_a/100.0,action_b/100.0,action_c/100.0])
+                #ret_action = numpy.array([action_a/100.0,action_b/100.0,action_c/100.0])
+                ret_action = numpy.array([action_a/val,action_b/val,action_c/val])
 
                 next_q=numpy.max(possible_q)
             else:
-                random=0 #random
+                ret_random=0 #random
+                print('random v')
                 action_a = numpy.random.uniform(0,1)
                 action_b = numpy.random.uniform(0,1)
                 action_c = numpy.random.uniform(0,1)
+                ret_action = numpy.array([action_a, action_b, action_c])
 
-                p_array[:,0]=numpy.hstack((state_mean[:,episode+1],selected_action))
+                p_array[:,0]=numpy.hstack((state_mean[:,episode+1],ret_action))
                 C, next_q=self.predict(p_array.T)
 
-        return random, selected_action, next_q
+        return ret_random, ret_action, next_q
 
     #def gen_action(self, possible_a, num_action, num_face, state_mean, episode,random_rate,action,reward,alpha):
     def gen_action(self, possible_a, state_mean, episode,random_rate,action,reward):
@@ -141,7 +152,7 @@ class Neural:
 
     #def update(self, state_mean, num_action, num_face, action, episode, q_teacher,
     def update(self, state_mean, action, episode, q_teacher, reward, next_q):
-    #reward, next_q, gamma, alpha):
+            #reward, next_q, gamma, alpha):
 
         # set input_array to predict
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
