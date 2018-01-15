@@ -15,8 +15,9 @@ def linear_state(single_state):
         #fitting
         a, b = np.polyfit(x, single_state[i,:], 1)
         #fitting line
+        a_float = float(a)
 
-    return math.atan(a)*2/math.pi
+    return math.atan(a_float)*2/math.pi
     #return a
 
 def check_thre(ir_sensor,thre):
