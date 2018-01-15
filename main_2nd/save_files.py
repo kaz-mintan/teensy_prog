@@ -3,6 +3,7 @@
 import numpy as np
 
 from datetime import datetime
+
 #datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 #now = datetime.datetime.now()
 #print('test_{0:%Y%m%d}'.format(now)) #test_20170910
@@ -39,4 +40,9 @@ class Save_csv:
         random_stack=self.stack_array_date(random,now)
         with open(self.random_name, 'a') as f_random:
             numpy.savetxt(f_random,random,fmt="%.5f",delimiter=",",newline="\n")
+    def save_all(self,state,action,face,random,now):
+        self.save_state(state,now)
+        self.save_action(action,now)
+        self.save_face(face,now)
+        self.save_random(random,now)
    #numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
