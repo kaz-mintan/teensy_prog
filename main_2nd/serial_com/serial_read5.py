@@ -4,6 +4,7 @@ import socket
 import sys
 import threading
 import binascii
+import numpy
 
 import sys
 
@@ -29,7 +30,7 @@ class Serial_read:
             return int_val
 
     def read_val(self):
-        read_val = np.zeros(number_irs)
+        read_val = numpy.zeros(number_irs)
         while True:
             serial_data = self.ser.read()
             if serial_data == 'H':
