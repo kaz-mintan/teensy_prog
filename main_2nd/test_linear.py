@@ -15,8 +15,10 @@ def linear_state(single_state):
 def check_thre(ir_sensor,thre):
     ret = -1
     for i in range(type_ir):
+        print('linear/ir_sensor',i,ir_sensor[i])
         if ir_sensor[i]>thre:
             ret = 1
+            break
         else:
             ret = 0
     return ret
