@@ -37,9 +37,8 @@ int serialNumVal() {
     input[i] = Serial.read();
     // 文字数が3以上 or 末尾文字がある場合の処理
     if (i > 2 || input[i] == '\0') {
+       //Serial.println(input);
       val = atoi(input);    // 文字列を数値に変換
-      Serial.println(input[i]);
-      Serial.println(val);
       i = 0;      // カウンタの初期化
       return val;
     }
@@ -66,23 +65,21 @@ void send_all(int pwm_input,int keep,int delay_time){
 	unsigned long start_time = millis();
 	int move_array[5]={0,0,0,0,0};
 
-	int stop_array[5]={keep*1000,
-		delay_time*1000+keep*1000,
-		delay_time*2*1000+keep*1000,
-		delay_time*3*1000+keep*1000,
-		delay_time*4*1000+keep*1000};
+	int stop_array[5]={keep*100,
+		delay_time*100+keep*100,
+		delay_time*2*100+keep*100,
+		delay_time*3*100+keep*100,
+		delay_time*4*100+keep*100};
 
 	int start_array[5]={0,
-		delay_time*1000,
-		delay_time*2*1000,
-		delay_time*3*1000,
-		delay_time*4*1000};
+		delay_time*100,
+		delay_time*2*100,
+		delay_time*3*100,
+		delay_time*4*100};
 
 	//act_sma(SMA_PIN_1,pwm_input);
 	unsigned long now_time;
   int dt;
-
-
 
   while(move_array[4]!=2){
     now_time = millis();
@@ -91,7 +88,6 @@ void send_all(int pwm_input,int keep,int delay_time){
   	for(i = 0; i<5; i++){
   		if(move_array[i]==0){
   			if(dt>start_array[i]){
-          Serial.println(i);
   				act_sma(pin_no[i],pwm_input);
           move_array[i]=1;
   			}
@@ -107,35 +103,32 @@ void send_all(int pwm_input,int keep,int delay_time){
   }
 }
 
-
+int vals[3];
+int k = 0;
 // メインループ
 void loop() {
-  //deg = serialNumVal();
-
-	int pwm_input;
-	int keep;
-	int delay_time;
-	int test_i = 0;
-
-  start_str = serial.read();
-  if(start_str == 'H'){
-	pwm_input = serialNumVal();
-	keep = serialNumVal();
-	delay_time = serialNumVal();
-
-	if(pwm_input > 0){
-		for(test_i=0;test_i<5;test_i++){
-			act_sma(i,pwm_input);
-		}
-		for(test_i=0;test_i<5;test_i++){
-			stop_sma(i);
-		}
-
-		send_all(pwm_input,keep,delay_time);
-
-		delay(10000);
-	}
+  int pwm_input;
+  float keep;
+  float delay_time;
+  
+  if(Serial.available()){
+    vals[k] = serialNumVal();
+    if(vals[k]>0){
+      Serial.println(k);
+      Serial.println(vals[k]);
+      k++;
+    }
+    //Serial.println(Serial.read());
+    if(k>2){
+      //*************
+      pwm_input = vals[0];
+      keep = vals[1];
+      delay_time = vals[2];
+      send_all(pwm_input,keep,delay_time);
+      delay(10000);
+      //*************
+      int vals[3];
+      k=0;
+    }
   }
-
 }
-
