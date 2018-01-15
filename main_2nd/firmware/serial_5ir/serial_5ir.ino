@@ -1,12 +1,11 @@
 //#include <Servo.h>
 //Global variables
-#define SMA_PIN   9     //Pin # for SMA PWM on P2
-#define LED_PIN   13    //Pin # for on-board Teensy LED
+
 #define IR_PIN_1 A0
 #define IR_PIN_2 A1
-#define IR_PIN_3 A16
-#define IR_PIN_4 A11
-#define IR_PIN_5 A13
+#define IR_PIN_3 A17
+#define IR_PIN_4 A13
+#define IR_PIN_5 A11
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
 #define TIME_OFF  20    //In Seconds (At least 30s)
 
@@ -32,7 +31,7 @@ void sendIntData(int ir[5]) {
   }
 }
 
-int pin_no[5]={IR_PIN_1,IR_PIN_2,IR_PIN_3,IR_PIN_4,IR_PIN_5}
+int pin_no[5]={IR_PIN_1,IR_PIN_2,IR_PIN_3,IR_PIN_4,IR_PIN_5};
 
 //グローバル変数の宣言
 int i = 0;
@@ -51,8 +50,11 @@ void loop() {
   for (j=0;j<5;j++){
 	  ir_val[j] = ir_val[j]/100.0;
 	  distance[j] = 6762/(ir_val[j]-9)-4;
+   //Serial.println(j);
+   //Serial.println(distance[j]);
   }
 
   sendIntData(distance);
+  //delay(500);
   //Serial.println(distance);
 }
