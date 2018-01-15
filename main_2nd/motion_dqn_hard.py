@@ -116,7 +116,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             #hand_motion.get_ir(state[type_face,while_t-1]),
             #hand_motion.get_ir(state[type_face,while_t-1]),
             #hand_motion.get_ir(state[type_face,while_t-1])))
-        #state[:,while_t] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1])))
+
         state=np.hstack((state,tmp_state))
 
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1:
