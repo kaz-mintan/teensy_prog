@@ -1,7 +1,6 @@
 //#include <Servo.h>
 //Global variables
-#define LED_PIN   13    //Pin # for on-board Teensy LED
-#define IR_PIN A0
+
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
 #define TIME_OFF_CO  0.125    //In Seconds (At least 30s)
 
@@ -25,7 +24,6 @@ void setup() {
   pinMode(SMA_PIN_3, OUTPUT);
   pinMode(SMA_PIN_4, OUTPUT);
   pinMode(SMA_PIN_5, OUTPUT);
-  pinMode(LED_PIN, OUTPUT); // On-Board Indicator LED
   //Intialize Serial Communication
   Serial.begin(19200);
 }
@@ -113,10 +111,13 @@ void loop() {
   
   if(Serial.available()){
     vals[k] = serialNumVal();
-    if(vals[k]>0){
+    if(vals[k]>0 && vals[k]<70){
       Serial.println(k);
       Serial.println(vals[k]);
       k++;
+    }else if(vals[k]>70){
+      k=0;
+      exit;
     }
     //Serial.println(Serial.read());
     if(k>2){
