@@ -11,6 +11,7 @@ from serial_pc import *
 
 from get_face_ir import *
 from serial_com import serial_sma
+from serial_com import send_3para
 
 import time
 from datetime import datetime
@@ -22,6 +23,8 @@ from test_linear import *
 
 from save_files import *
 from datetime import datetime
+
+from action_convert import *
 
 t_window = 10  #number of time window
 num_episodes = 50  #number of all trials
@@ -44,10 +47,10 @@ ser_baud = 19200
 #5 [4] start main function. set parameters
 argvs = sys.argv
 mode = argvs[1]
-#ser_port_sma = argvs[2]
-#ser_port_ir = argvs[3]
-#print('port_sma',ser_port_sma)
-#print('port_ir',ser_port_ir)
+ser_port_sma = argvs[2]
+ser_port_ir = argvs[3]
+print('port_sma',ser_port_sma)
+print('port_ir',ser_port_ir)
 
 # [5] main tourine
 state = np.zeros((type_face+type_ir,1))
@@ -90,7 +93,7 @@ if mode == 'predict':
 
 # setting of serial com
 get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
-sma_act = serial_sma.Act_sma(ser_port_sma,ser_baud)
+sma_act = send_3para.Act_sma(ser_port_sma,ser_baud)
 
 #for save files
 save_files = Save_csv(datetime.now())
@@ -103,20 +106,14 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros((type_face+type_ir,1))
 
     wait = True
-    thre = 0.05
-    wait_time = 0.1
+    thre = 50
+    wait_time = 5
 
     while_t = 1
     while wait:
         #state[:,while_t]=get_val.ret_state()#TODO
-        state[:,0] = get_val.ret_state()
-        #tmp_state[:,0] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1])))
-
+        tmp_state[:,0] = get_val.ret_state()
+        print('state',tmp_state[:,0])
         state=np.hstack((state,tmp_state))
 
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1:
@@ -127,30 +124,20 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     # if the sensor is larger than the value of threshold, sma starts to move
     #state_mean[:,episode] = get_state_mean()#TODO
-    state_mean[:,episode] = linear_state(state.T)#TODO
+    print('main/state.T',state)
+    state_mean[:,episode] = linear_state(state)#TODO
 
 
     ### calcurate a_{t} based on s_{t}
     random_rate = 0.4# * (1 / (episode + 1))
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
 
-def convert_action(action):
-    pwm_input = 50*action[0]+10
-    keep = 1.5*action[1]+0.2
-    delay = 3.0*action[2] + 0.2
-    return np.array([pwm_input,keep,delay])
-
     #sma_act.act(action[:,episode])
-    sma_act.act(convert(action[:,episode]))
+    print('action',(convert_action(action[:,episode])))
+    sma_act.send_para(convert_action(action[:,episode]))
 
     for t in range(1,t_window):
         state_reward[:,t] = get_val.ret_state()
-        #state_reward[:,t] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1]),
-            #hand_motion.get_ir(state[type_face,while_t-1])))
 
     ### calcurate s_{t+1} based on the value of sensors
     state_mean[:,episode+1]=seq2feature(state_reward)
