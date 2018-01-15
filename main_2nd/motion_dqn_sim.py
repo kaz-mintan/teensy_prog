@@ -52,6 +52,7 @@ mode = argvs[1]
 state = np.zeros((type_face+type_ir,1))
 tmp_state = np.zeros((type_face+type_ir,1))
 state_mean = np.zeros((type_face+type_ir,num_episodes))
+state_reward = np.zeros((type_face+type_ir,t_window))
 
 state_before = np.zeros_like(state) #for delta mode
 state_predict = np.zeros_like(state) #for predict mode
@@ -62,7 +63,9 @@ random = np.zeros(num_episodes)
 
 #initialize action
 action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
-possible_a = np.linspace(0,1,100)
+possible_a = np.linspace(0,1,10)
+print('shape',possible_a.shape[0])
+raw_input()
 
 ## set qfunction as nn
 q_input_size = type_face + type_ir + type_action
@@ -106,7 +109,7 @@ def check_thre(ir_sensor,thre):
 for episode in range(num_episodes-1):  #repeat for number of trials
 
     print('episode',episode,'action',action[:,episode])
-    state = np.zeros_like(state_before)
+    state = np.zeros((type_face+type_ir,1))
 
     wait = True
     thre = 0.005
@@ -115,11 +118,14 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     while_t = 1
     while wait:
         #state[:,while_t]=get_val.ret_state()#TODO
-        tmp_state[:,0] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1])))
+        tmp_state[:,0] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1])))
         #state[:,while_t] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1])))
         state=np.hstack((state,tmp_state))
-        print('tmp_state',tmp_state)
-        print('while_t',while_t)
 
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1:
             time.sleep(wait_time)
@@ -130,24 +136,26 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     # if the sensor is larger than the value of threshold, sma starts to move
     #state_mean[:,episode] = get_state_mean()#TODO
     state_mean[:,episode] = linear_state(state)#TODO
-    print('state_mean',state_mean[:,episode])
 
     ### calcurate a_{t} based on s_{t}
     random_rate = 0.4# * (1 / (episode + 1))
-    random[episode], action[:,episode], next_q = test_gen_action(possible_a, state_mean, episode, random_rate)
+    random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
     #sma_act.act(action[:,episode])
 
-    t_window = 100#TODO action[]に基づき決定する
     for t in range(1,t_window):
-        #state_reward[:,t] = get_val.ret_state()
-        state_reward[:,t] = calc_reward(state, state_predict, state_before, t_window, mode)
-        print('state',state[:,t])
+        #state_reward[:,t] = 
+        state_reward[:,t] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1]),
+            hand_motion.get_ir(state[type_face,while_t-1])))
 
     ### calcurate s_{t+1} based on the value of sensors
     state_mean[:,episode+1]=seq2feature(state_reward)
 
     ### calcurate r_{t}
-    reward[episode+1] = calc_reward(state, state_predict,
+    reward[episode+1] = calc_reward(state_reward, state_predict,
             state_before,t_window, mode)
     print('acted',action[:,episode],'reward',reward[episode+1])
 
