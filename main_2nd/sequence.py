@@ -29,8 +29,6 @@ def calc_reward(state, state_predict, state_before, time_window, mode):
     if mode == 'delta':
         c_face=np.zeros(num_face)
         c_face = np.mean(face,axis=1)-np.mean(face_before,axis=1)
-        #d_face = face_post - face[:,:time_window-1]
-        #d_face = face - face_before
         reward = np.dot(c_face,c)
 
     elif mode == 'heuristic':
