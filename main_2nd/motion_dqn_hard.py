@@ -141,7 +141,7 @@ def convert_action(action):
     return np.array([pwm_input,keep,delay])
 
     #sma_act.act(action[:,episode])
-    sma_act.act(action[:,episode])
+    sma_act.act(convert(action[:,episode]))
 
     for t in range(1,t_window):
         state_reward[:,t] = get_val.ret_state()
