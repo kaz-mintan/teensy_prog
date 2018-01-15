@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from socket_com import socket_face
-from serial_com import serial_read
+from serial_com import serial_read5
 import numpy as np
 
 #def get_state(ser_port, ser_baud, soc_host, soc_port):
 class Get_state:
     def __init__(self,ser_port, ser_baud, soc_host, soc_port):
-        self.ir_sensor = serial_read.Serial_read(ser_port,ser_baud)
+        self.ir_sensor = serial_read5.Serial_read(ser_port,ser_baud)
         self.face_sensor = socket_face.Get_face(soc_host,soc_port)
 
     def ret_state(self):
