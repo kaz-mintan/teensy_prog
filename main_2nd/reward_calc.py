@@ -8,15 +8,13 @@ type_ir = 5
 
 def f(face):
     face_next = face[:,1:] #for delta mode
-    print('face',face)
-    print('face_pots',face_post)
     print(face_next-face[:,:face.shape[1]-1])
     do_sum = np.sum(face_next-face[:,:face.shape[1]-1],axis=1)
 
     return do_sum
 
 def g(face):
-    amp_sum = np.sum(face*0.5 - np.ones_like(face)*0.5)
+    amp_sum = np.sum(face - np.ones_like(face)*0.5,axis=1)
     return amp_sum
 
 def reward_function(state, state_predict, state_before, mode):
