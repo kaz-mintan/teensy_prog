@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-from sequence import *
+#from sequence import *
 from neural_network import *
 from serial_pc import *
 
@@ -25,6 +25,7 @@ from save_files import *
 from datetime import datetime
 
 from action_convert import *
+from reward_calc import *
 
 t_window = 10  #number of time window
 num_episodes = 50  #number of all trials
@@ -119,8 +120,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1:
             time.sleep(wait_time)
             wait = False
-
-        while_t += 1
+        else:
+            while_t += 1
 
     # if the sensor is larger than the value of threshold, sma starts to move
     #state_mean[:,episode] = get_state_mean()#TODO
@@ -137,15 +138,32 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     print('action',(convert_action(action[:,episode])))
     sma_act.send_para(convert_action(action[:,episode]))
 
-    for t in range(1,t_window):
-        state_reward[:,t] = get_val.ret_state()
+    reward_wait= True
+    rewhile_t = 1
+    while reward_wait:
+        #state[:,while_t]=get_val.ret_state()#TODO
+        tmp_state[:,0] = get_val.ret_state()
+        print('state',tmp_state[:,0])
+        state=np.hstack((state,tmp_state))
+
+        if check_thre(np.array(state[type_face:type_ir+type_face,rewhile_t]),thre)==1:
+            time.sleep(wait_time)
+            reward_wait = False
+        else:
+            rewhile_t+= 1
+
+    #for t in range(1,t_window):
+        #state_reward[:,t] = get_val.ret_state()
 
     ### calcurate s_{t+1} based on the value of sensors
-    state_mean[:,episode+1]=seq2feature(state_reward)
+    #state_mean[:,episode+1]=seq2feature(state_reward)
+    #state_mean[:,episode+1]=seq2feature(state_reward)
 
     ### calcurate r_{t}
-    reward[episode+1] = calc_reward(state_reward, state_predict,
-            state_before,t_window, mode)
+    #reward[episode+1] = calc_reward(state_reward, state_predict,
+    reward[episode+1] = reward_function(state_reward, state_predict,
+            state_before, mode)
+            #state_before,t_window, mode)
     print('reward',reward[episode+1])
 
     #random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
