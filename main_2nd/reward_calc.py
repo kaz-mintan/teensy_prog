@@ -57,3 +57,4 @@ if __name__ == "__main__" :
     print('state_ran',state_ran)
     #state_ran = np.random.rand(5,5)
     print(f(np.array(state_ran[0:num_face,:])))
+    print(g(np.array(state_ran[0:num_face,:])))
