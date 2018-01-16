@@ -111,11 +111,11 @@ void loop() {
   
   if(Serial.available()){
     vals[k] = serialNumVal();
-    if(vals[k]>0 && vals[k]<70){
+    if(vals[k]>0 && vals[k]<90){
       Serial.println(k);
       Serial.println(vals[k]);
       k++;
-    }else if(vals[k]>70){
+    }else if(vals[k]>90){
       k=0;
       exit;
     }
@@ -126,7 +126,7 @@ void loop() {
       keep = vals[1];
       delay_time = vals[2];
       send_all(pwm_input,keep,delay_time);
-      delay(10000);
+      delay(5000);
       //*************
       int vals[3];
       k=0;
