@@ -5,18 +5,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-from sequence import *
+#from sequence import *
 from neural_network import *
 from serial_pc import *
 
 from get_face_ir import *
 from serial_com import serial_sma
+from serial_com import send_3para
 
 import time
 from datetime import datetime
 
-t_window = 100  #number of time window
-num_episodes = 300  #number of all trials
+#for test
+from dummy_modules import dummy_evaluator
+from dummy_modules import hand_motion
+from test_linear import *
+
+from save_files import *
+from datetime import datetime
+
+from action_convert import *
+from reward_calc import *
+
+from test_save_txt import *
+
+t_window = 10  #number of time window
+num_episodes = 50  #number of all trials
 
 type_face = 5
 type_ir = 5 #5 ir sensors
@@ -42,8 +56,10 @@ print('port_sma',ser_port_sma)
 print('port_ir',ser_port_ir)
 
 # [5] main tourine
-state = np.zeros((type_face+type_ir,t_window))
+state = np.zeros((type_face+type_ir,1))
+tmp_state = np.zeros((type_face+type_ir,1))
 state_mean = np.zeros((type_face+type_ir,num_episodes))
+state_reward = np.zeros((type_face+type_ir,t_window))
 
 state_before = np.zeros_like(state) #for delta mode
 state_predict = np.zeros_like(state) #for predict mode
@@ -54,7 +70,8 @@ random = np.zeros(num_episodes)
 
 #initialize action
 action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
-possible_a = np.linspace(0,1,100)
+possible_a = np.linspace(0,1,10)
+print('shape',possible_a.shape[0])
 
 ## set qfunction as nn
 q_input_size = type_face + type_ir + type_action
@@ -79,51 +96,77 @@ if mode == 'predict':
 
 # setting of serial com
 get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
-sma_act = serial_sma.Act_sma(ser_port_sma,ser_baud)
+sma_act = send_3para.Act_sma(ser_port_sma,ser_baud)
 
-thre = 10
+#for save files
+save_files = Save_csv(datetime.now())
+
+state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
+state_reward[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
 
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
 
-    print('episode',episode,'action',action[:,episode])
-    state = np.zeros_like(state_before)
+    state = np.zeros((type_face+type_ir,1))
 
     wait = True
-    thre = 0.5
-    wait_time = 0.1
+    thre = 30
+    wait_cycle = 5
 
-    while_t = 0
+    while_t = 1
     while wait:
-        state[:,while_t]=get_val.ret_state()#TODO
-        while_t+ = 1
-        if state[:,while_t]>thre:
-            sleep(wait_time)
+        tmp_state[:,0] = get_val.ret_state()
+
+        print('fase/ir as state',tmp_state[:,0])
+        state=np.hstack((state,tmp_state))
+
+        if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1 and while_t > wait_cycle:
             wait = False
+        else:
+            while_t += 1
 
     # if the sensor is larger than the value of threshold, sma starts to move
-    state_mean[:,episode] = get_state_mean()#TODO
+    state_mean[:,episode] = linear_state(state)#TODO
+    with open('test_state_mean.csv', 'a') as smean_handle:
+        numpy.savetxt(smean_handle,tmp_log(state_mean[:,episode]),fmt="%.5f",delimiter=",")
 
     ### calcurate a_{t} based on s_{t}
     random_rate = 0.4# * (1 / (episode + 1))
-    random[episode], action[:,episode], next_q = test_gen_action(possible_a, state_mean, episode, random_rate)
-    sma_act.act(action[:,episode])
+    random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
 
-    t_window = 100#TODO action[]に基づき決定する
-    for t in range(1,t_window):
-        state_reward[:,t] = get_val.ret_state()
-        print('state',state[:,t])
+    with open('test_action.csv', 'a') as act_handle:
+        numpy.savetxt(act_handle,tmp_log(np.hstack((random[episode],action[:,episode]))),fmt="%.5f",delimiter=",")
 
-    ### calcurate s_{t+1} based on the value of sensors
-    state_mean[:,episode+1]=seq2feature(state_reward)
+    print('action',(convert_action(action[:,episode])))
+    sma_act.send_para(convert_action(action[:,episode]))
+
+    reward_wait= True
+    rewhile_t = 1
+    start_time = datetime.now()
+    action_time = action[1,episode]*5+action[2,episode]*2#sec
+    while reward_wait:
+        #state[:,while_t]=get_val.ret_state()#TODO
+        tmp_state[:,0] = get_val.ret_state()
+        with open('test_reward_face.csv', 'a') as rf_handle:
+            numpy.savetxt(rf_handle,tmp_log(tmp_state[:,0]).T,fmt="%.5f",delimiter=",")
+
+        print('face as reward',tmp_state[:,0])
+        state_reward=np.hstack((state_reward,tmp_state))
+
+        now_time = datetime.now()
+        delta_time = now_time - start_time
+
+        if delta_time.total_seconds() > action_time:
+            reward_wait = False
+        else:
+            rewhile_t+= 1
 
     ### calcurate r_{t}
-    reward[episode+1] = calc_reward(state, state_predict,
-            state_before,t_window, mode)
-    print('acted',action[:,episode],'reward',reward[episode+1])
+    reward[episode+1] = reward_function(state_reward, state_predict, state_before, mode)
+    with open('test_reward.csv', 'a') as reward_handle:
+        numpy.savetxt(reward_handle,tmp_log(np.hstack((reward[episode+1],np.array([episode+1])))),fmt="%.5f",delimiter=",")
 
-    #random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
-            #state_mean, episode,random_rate,action,reward,alpha)
+    print('reward',reward[episode+1])
 
     q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
     #q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
@@ -133,13 +176,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                 action, episode,p_teacher,reward,next_q)
                 #action, episode,p_teacher,reward,next_q, gamma, alpha)
 
-    #before_state = state[:,t_window-1]
     state_before = state
+    time.sleep(5)
 
-save_file(num_episodes,action,target_type,target_direct,mode)
-
-np.savetxt('action_pwm.csv', action[0,:], fmt="%.3f", delimiter=",")
-np.savetxt('reward_seq.csv', reward, fmt="%.5f",delimiter=",")
-np.savetxt('situation.csv', state_mean.T,fmt="%.2f", delimiter=",")
-np.savetxt('random_counter.csv', random,fmt="%.0f", delimiter=",")
-np.savetxt('q_value.csv', q_teacher,fmt="%.5f", delimiter=",")

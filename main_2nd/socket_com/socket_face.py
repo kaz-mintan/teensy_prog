@@ -20,21 +20,26 @@ class Get_face:
         ret = 0
         for t in range(self.num_face):
             if face_tmp_list[t]:
-                if face_tmp_list[t] == '':
+                if face_tmp_list[t].isdigit() == False:
+                #if face_tmp_list[t] == '':
+                #if isinstance(face_tmp_list[0],int) == False:
                     print('face_list',face_tmp_list)
                     print('break')
                     ret = 0
                     return ret
-
-        face_int = map(int,face_tmp_list[0:5])
-        for i in range(self.num_face):
-            #print('face_tmp_list',face_tmp_list[i])
-            if face_int[i]<100 and face_int[i]>=0:
-                ret = 1
-            else:
-                ret = 0
-                break
-        return ret
+                else:
+                    ret = 1
+        if ret == 1:
+        #if isinstance(face_tmp_list[0],int) == True:
+            face_int = map(int,face_tmp_list[0:5])
+            for i in range(self.num_face):
+                #print('face_tmp_list',face_tmp_list[i])
+                if face_int[i]<100 and face_int[i]>=0:
+                    ret = 1
+                else:
+                    ret = 0
+                    break
+            return ret
 
     def read_face(self):
         get_face = np.zeros(self.num_face)
@@ -56,4 +61,4 @@ if __name__ == "__main__" :
 
     get = Get_face(host,port)
     while True:
-        get.read_face()
+        print(get.read_face())

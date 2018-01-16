@@ -14,6 +14,8 @@ int deg = 0;    // サーボの角度
 int wait_count = 50;
 int wait_cool = 0;
 int rcv_flg = 0;
+int ir_val = 0;
+int distance = 0;
 
 void setup() {
   // Declarations for Sensor and Actuator Pins
@@ -52,38 +54,40 @@ void sendIntData(int value) {
   Serial.write(lowByte(value)); // 下位バイトの送信
 }
 
-//  sendIntData(distance);
-
 unsigned long start_time;
 unsigned long now_time;
 
 
 // メインループ
 void loop() {
-  
   if(rcv_flg == 1){
   	deg = serialNumVal();
     if(deg>0 && deg<100){
       sendIntData(deg);
   	  rcv_flg = 2;//stop to receive pwm
-
+      sendIntData(rcv_flg);
     }
   }else if(rcv_flg == 0){
 	  wait_count++;
     now_time = millis();
-    sendIntData(5);
+    //sendIntData(5);
     //check possibility to get pwm
     if((now_time - start_time) > wait_cool){
     //if(wait_count>wait_cool){
       wait_count=0;
       rcv_flg = 1;//lets receive pwm val!
+      sendIntData(rcv_flg);
+
       wait_cool=0;
     }
-  }
-  
-  //Serial.println(rcv_flg);
-  
-  if(rcv_flg == 2){
+    ir_val = 0;
+    for (i=0 ; i < 100 ; i++) {
+      ir_val  = ir_val + analogRead(IR_PIN) ;   // 指定のアナログピン(0番端子)から読取ります
+    }
+    ir_val = ir_val/100.0;
+    distance = 6762/(ir_val-9)-4;
+    //sendIntData(distance);
+  }else if(rcv_flg == 2){
     analogWrite(SMA_PIN, map(deg, 0, 100, 0, 255));
     digitalWrite(LED_PIN, HIGH);
     delay(TIME_ON * 1000); // SMA ON time (ms)
@@ -94,6 +98,7 @@ void loop() {
     //delay(TIME_OFF_CO * 1000 * deg); // SMA Cool time (ms)
     start_time = millis();
 	  rcv_flg = 0;
+    deg = -1;
     sendIntData(rcv_flg);
   }
 }

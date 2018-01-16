@@ -12,15 +12,15 @@ num_ir = 1
 def calc_reward(state, state_predict, state_before, time_window, mode):
     # coefficient
 
-    c = np.array([0,20.0,20.0,-20.0,-20.0]) #for delta mode
-    h = np.array([0,20.0,20.0,-20.0,-20.0]) #for heuristic mode
+    c = np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
+    h = np.array([0,70.0,70.0,-70.0,-70.0]) #for heuristic mode
     reward = 0
 
     # extract face array (must be time sequence data)
     face = state[0:num_face,:] #in numpy, the 5 of the 0:5 is not included
     face_before = state_before[0:num_face,:]
     #face_before = state[0:num_face,:]
-    face_post = face[:,1:] #for delta mode
+    #face_post = face[:,1:] #for delta mode
     face_predict = state_predict[0:num_face,:] #for predict mode
     #print('sequence.py/face and face_before',face,face_before)
 
@@ -29,8 +29,6 @@ def calc_reward(state, state_predict, state_before, time_window, mode):
     if mode == 'delta':
         c_face=np.zeros(num_face)
         c_face = np.mean(face,axis=1)-np.mean(face_before,axis=1)
-        #d_face = face_post - face[:,:time_window-1]
-        #d_face = face - face_before
         reward = np.dot(c_face,c)
 
     elif mode == 'heuristic':

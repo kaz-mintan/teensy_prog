@@ -5,14 +5,9 @@ import time
 class Serial_com: 
 
     def __init__(self, port, baud):
-        self.port = port
-        self.baud = baud
+        ser = serial.Serial(port, baud, timeout=1)
 
     def action(self, pwm):
-        #while True:
-        #while True:
-        #if move_flg == 1:
-        ser = serial.Serial(self.port, self.baud, timeout=1)
         ser.write(str(pwm)+"\0")
         print('pwm',pwm)
         print('serius hage!')
@@ -59,7 +54,7 @@ if __name__ == '__main__':
     ser = serial.Serial(port, baud, timeout=1)
     print('input')
     pwm = raw_input()
-    ser.write(str(pwm)+"\0")
+    ser.write(pwm+"\0")
  
     #main()
     sma = Serial_com(port,baud)

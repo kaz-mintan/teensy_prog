@@ -6,7 +6,7 @@ import threading
 import binascii
 
 # シリアル通信の設定(
-ser = serial.serial("/dev/ttyacm0", 9600, timeout=1)
+#ser = serial.serial("/dev/ttyacm0", 9600, timeout=1)
 
 def react_formula(ir_value):
     sma_val=ir_value*1/3
@@ -27,12 +27,14 @@ if __name__ == '__main__':
 
     print 'Waiting for connections...'
     clientsock, client_address = serversock.accept() #接続されればデータを格納
+    print 'connected'
 
     while True:
         rcvmsg = clientsock.recv(1024)
         face = rcvmsg.split(",")
         face_int = map(int,face[0:5])
         print face_int
+        '''
         deg = react_formula(face_int[1])
         ser.write(str(deg)+"\0")
 
@@ -56,5 +58,6 @@ if __name__ == '__main__':
                 #ser.write(str(deg)+"\0")
                 #ここでちゃんと遅れてる？
                 #終了処理などちゃんとして？
+                '''
 
     clientsock.close()
