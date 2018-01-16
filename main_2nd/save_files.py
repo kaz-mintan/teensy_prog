@@ -24,25 +24,25 @@ class Save_csv:
     def save_state(self,state,now):
         state_stack=self.stack_array_date(state, now)
         with open(self.state_name, 'a') as f_state:
-            numpy.savetxt(f_state,state,fmt="%.5f",delimiter=",",newline="\n")
+            np.savetxt(f_state,state,fmt="%.5f",delimiter=",",newline="\n")
 
     def save_action(self,action,now):
         action_stack=self.stack_array_date(action, now)
         with open(self.action_name, 'a') as f_action:
-            numpy.savetxt(f_action,action,fmt="%.5f",delimiter=",",newline="\n")
+            np.savetxt(f_action,action,fmt="%.5f",delimiter=",",newline="\n")
 
     def save_face(self, face,now):
         face_stack=self.stack_array_date(face,now)
         with open(self.face_name, 'a') as f_face:
-            numpy.savetxt(f_face,face,fmt="%.5f",delimiter=",",newline="\n")
+            np.savetxt(f_face,face,fmt="%.5f",delimiter=",",newline="\n")
 
     def save_random(self, random,now):
         random_stack=self.stack_array_date(random,now)
         with open(self.random_name, 'a') as f_random:
-            numpy.savetxt(f_random,random,fmt="%.5f",delimiter=",",newline="\n")
+            np.savetxt(f_random,random,fmt="%.5f",delimiter=",",newline="\n")
     def save_all(self,state,action,face,random,now):
         self.save_state(state,now)
         self.save_action(action,now)
         self.save_face(face,now)
         self.save_random(random,now)
-   #numpy.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
+   #np.savetxt(f_handle,memo_q,fmt="%.5f",delimiter=",",newline="\n")
