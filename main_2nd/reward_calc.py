@@ -13,12 +13,13 @@ def f(face):
     return do_sum
 
 def g(face):
-    amp_sum = np.sum(face - np.ones_like(face)*0.5,axis=1)
+    amp_sum = np.sum(face - np.ones_like(face)*50,axis=1)
     return amp_sum
 
 def reward_function(state, state_predict, state_before, mode):
     # extract face array (must be time sequence data)
     face = state[0:num_face,:] #in numpy, the 5 of the 0:5 is not included
+    print('reward_func',face)
 
     # coefficient
     c_f = np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
