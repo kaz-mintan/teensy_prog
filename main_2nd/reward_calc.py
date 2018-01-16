@@ -1,6 +1,7 @@
 # coding:utf-8
 # calculates reward based on recognized facial expression
 import numpy as np
+import math
 
 num_face = 5
 type_face = 5
@@ -34,15 +35,11 @@ def reward_function(state, state_predict, state_before, mode):
     elif mode == 'heuristic':
         reward = np.sum(c_g*g(face))
 
-
-        reward = np.mean(h_face)
-
     elif mode == 'predict':
         face_predict = state_predict[0:num_face,:] #for predict mode
         e_face = face_predict[0,:type_face] - np.mean(face,axis=1)
+
         reward = math.fabs(1.0/np.mean(e_face))
-
-
 
     return reward
 
