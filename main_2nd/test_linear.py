@@ -13,14 +13,12 @@ def linear_state(single_state):
     #print('line/single_state',single_state.shape[1])
     a = np.zeros((single_state.shape[0],1))
     for i in range(single_state.shape[0]):
-        print('single_state',single_state[i,:])
         x = np.linspace(0,1,single_state[i,:].shape[0])
         #fitting
         b, c = np.polyfit(x, single_state[i,:], 1)
         #fitting line
         a[i,0] = atan(b)
 
-    print('test_linear/a',a)
     return a[:,0]
     #return a
 
