@@ -137,6 +137,9 @@ void loop() {
       //*************
       int vals[3];
       k=0;
+      pwm_input = 0;
+      keep = 0;
+      delay_time = 0;
     }
   }
 }
