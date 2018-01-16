@@ -40,6 +40,7 @@ if __name__ == '__main__':
     type_face = 5
     type_ir = 5
 
-    state = np.zeros((type_face+type_ir,5))
+    state = np.random.rand((type_face+type_ir,5))
+    #state = np.zeros((type_face+type_ir,5))
     print(linear_state(state))
 
