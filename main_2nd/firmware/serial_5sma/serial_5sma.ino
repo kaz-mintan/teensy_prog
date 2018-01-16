@@ -103,6 +103,8 @@ void send_all(int pwm_input,int keep,int delay_time){
 
 int vals[3];
 int k = 0;
+unsigned long k_time;
+unsigned long n_time;
 // メインループ
 void loop() {
   int pwm_input;
@@ -112,10 +114,13 @@ void loop() {
   if(Serial.available()){
     vals[k] = serialNumVal();
     if(vals[k]>0 && vals[k]<90){
-      Serial.println(k);
-      Serial.println(vals[k]);
       k++;
+      k_time = millis();
     }else if(vals[k]>90){
+      k=0;
+      exit;
+    }
+    if(k_time-n_time>100000){
       k=0;
       exit;
     }
@@ -126,7 +131,7 @@ void loop() {
       keep = vals[1];
       delay_time = vals[2];
       send_all(pwm_input,keep,delay_time);
-      delay(5000);
+      delay((keep+delay_time)*100);
       //*************
       int vals[3];
       k=0;
