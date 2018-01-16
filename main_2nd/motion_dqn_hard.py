@@ -27,6 +27,8 @@ from datetime import datetime
 from action_convert import *
 from reward_calc import *
 
+from test_save_txt import *
+
 t_window = 10  #number of time window
 num_episodes = 50  #number of all trials
 
@@ -108,18 +110,14 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros((type_face+type_ir,1))
 
     wait = True
-    thre = 50
+    thre = 30
     wait_cycle = 5
 
     while_t = 1
     while wait:
-        #state[:,while_t]=get_val.ret_state()#TODO
         tmp_state[:,0] = get_val.ret_state()
-        with open('test_state_realtime.csv', 'a') as state_handle:
-            numpy.savetxt(state_handle,tmp_state[:,0],fmt="%.0f",delimiter=",")
-        #save_files.save_state(tmp_state[:,0],datetime.now())
 
-        print('state',tmp_state[:,0])
+        print('fase/ir as state',tmp_state[:,0])
         state=np.hstack((state,tmp_state))
 
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1 and while_t > wait_cycle:
@@ -128,21 +126,17 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             while_t += 1
 
     # if the sensor is larger than the value of threshold, sma starts to move
-    #state_mean[:,episode] = get_state_mean()#TODO
     state_mean[:,episode] = linear_state(state)#TODO
     with open('test_state_mean.csv', 'a') as smean_handle:
-        numpy.savetxt(smean_handle,state_mean[:,episode].T,fmt="%.5f",delimiter=",")
+        numpy.savetxt(smean_handle,tmp_log(state_mean[:,episode]),fmt="%.5f",delimiter=",")
 
     ### calcurate a_{t} based on s_{t}
     random_rate = 0.4# * (1 / (episode + 1))
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
 
     with open('test_action.csv', 'a') as act_handle:
-        #numpy.savetxt(act_handle,action[:,episode],fmt="%.5f",delimiter=",")
-        numpy.savetxt(act_handle,np.hstack((random[episode].T,action[:,episode].T)),fmt="%.5f",delimiter=",")
-        #numpy.savetxt(act_handle,np.hstack((random[episode],action[:,episode],next_q)),fmt="%.5f",delimiter=",")
+        numpy.savetxt(act_handle,tmp_log(np.hstack((random[episode],action[:,episode]))),fmt="%.5f",delimiter=",")
 
-    #sma_act.act(action[:,episode])
     print('action',(convert_action(action[:,episode])))
     sma_act.send_para(convert_action(action[:,episode]))
 
@@ -154,10 +148,10 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         #state[:,while_t]=get_val.ret_state()#TODO
         tmp_state[:,0] = get_val.ret_state()
         with open('test_reward_face.csv', 'a') as rf_handle:
-            numpy.savetxt(rf_handle,tmp_state[:,0].T,fmt="%.5f",delimiter=",")
+            numpy.savetxt(rf_handle,tmp_log(tmp_state[:,0]).T,fmt="%.5f",delimiter=",")
 
-        print('reward',tmp_state[:,0])
-        state=np.hstack((state,tmp_state))
+        print('face as reward',tmp_state[:,0])
+        state_reward=np.hstack((state_reward,tmp_state))
 
         now_time = datetime.now()
         delta_time = now_time - start_time
@@ -168,17 +162,11 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             rewhile_t+= 1
 
     ### calcurate r_{t}
-    #reward[episode+1] = calc_reward(state_reward, state_predict,
     reward[episode+1] = reward_function(state_reward, state_predict, state_before, mode)
     with open('test_reward.csv', 'a') as reward_handle:
-        #numpy.savetxt(reward_handle,reward[episode+1],np.array([episode+1]),fmt="%.5f",delimiter=",")
-        #numpy.savetxt(reward_handle,np.hstack((reward[episode+1],np.array([episode+1]))),fmt="%.5f",delimiter=",")
+        numpy.savetxt(reward_handle,tmp_log(np.hstack((reward[episode+1],np.array([episode+1])))),fmt="%.5f",delimiter=",")
 
-            #state_before,t_window, mode)
     print('reward',reward[episode+1])
-
-    #random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
-            #state_mean, episode,random_rate,action,reward,alpha)
 
     q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
     #q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
@@ -188,6 +176,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                 action, episode,p_teacher,reward,next_q)
                 #action, episode,p_teacher,reward,next_q, gamma, alpha)
 
-    #before_state = state[:,t_window-1]
     state_before = state
+    time.sleep(5)
 
