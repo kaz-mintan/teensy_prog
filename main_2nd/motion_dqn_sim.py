@@ -24,7 +24,7 @@ from save_files import *
 from datetime import datetime
 
 t_window = 10  #number of time window
-num_episodes = 50  #number of all trials
+num_episodes = 300  #number of all trials
 
 type_face = 5
 type_ir = 5 #5 ir sensors
@@ -109,13 +109,13 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     while_t = 1
     while wait:
         #state[:,while_t]=get_val.ret_state()#TODO
-        tmp_state[:,0] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),
+        tmp_state[:,0] = np.hstack((dummy_evaluator.get_face(action[1,episode],'happy','posi',while_t,t_window),
             hand_motion.get_ir(state[type_face,while_t-1]),
             hand_motion.get_ir(state[type_face,while_t-1]),
             hand_motion.get_ir(state[type_face,while_t-1]),
             hand_motion.get_ir(state[type_face,while_t-1]),
             hand_motion.get_ir(state[type_face,while_t-1])))
-        #state[:,while_t] = np.hstack((dummy_evaluator.get_face(action[0,episode],'happy','posi',while_t,t_window),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1]),hand_motion.get_ir(state[type_face,while_t-1])))
+
         state=np.hstack((state,tmp_state))
 
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1:
@@ -125,13 +125,11 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         while_t += 1
 
     # if the sensor is larger than the value of threshold, sma starts to move
-    #state_mean[:,episode] = get_state_mean()#TODO
-    state_mean[:,episode] = linear_state(state.T)#TODO
+    state_mean[:,episode] = linear_state(state)#TODO
 
     ### calcurate a_{t} based on s_{t}
     random_rate = 0.4# * (1 / (episode + 1))
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
-    #sma_act.act(action[:,episode])
 
     for t in range(1,t_window):
         #state_reward[:,t] = 
@@ -164,3 +162,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     #before_state = state[:,t_window-1]
     state_before = state
 
+np.savetxt('action_pwm.csv', action[0,:], fmt="%.3f", delimiter=",")
+np.savetxt('reward_seq.csv', reward, fmt="%.5f",delimiter=",")
+np.savetxt('situation.csv', state_mean.T,fmt="%.2f", delimiter=",")
+np.savetxt('random_counter.csv', random,fmt="%.0f", delimiter=",")
