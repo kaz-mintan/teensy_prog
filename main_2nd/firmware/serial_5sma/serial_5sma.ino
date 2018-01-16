@@ -114,10 +114,10 @@ void loop() {
   
   if(Serial.available()){
     vals[k] = serialNumVal();
-    if(vals[k]>0 && vals[k]<90){
+    if(vals[k]>0 && vals[k]<=100){
       k++;
       k_time = millis();
-    }else if(vals[k]>90){
+    }else if(vals[k]>110){
       k=0;
       exit;
     }

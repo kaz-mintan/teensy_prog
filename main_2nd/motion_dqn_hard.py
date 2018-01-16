@@ -171,7 +171,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     #reward[episode+1] = calc_reward(state_reward, state_predict,
     reward[episode+1] = reward_function(state_reward, state_predict, state_before, mode)
     with open('test_reward.csv', 'a') as reward_handle:
-        numpy.savetxt(reward_handle,reward[episode+1],np.array([episode+1]),fmt="%.5f",delimiter=",")
+        #numpy.savetxt(reward_handle,reward[episode+1],np.array([episode+1]),fmt="%.5f",delimiter=",")
         #numpy.savetxt(reward_handle,np.hstack((reward[episode+1],np.array([episode+1]))),fmt="%.5f",delimiter=",")
 
             #state_before,t_window, mode)
