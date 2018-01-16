@@ -5,7 +5,7 @@
 #define IR_PIN_2 A1
 #define IR_PIN_3 A17
 #define IR_PIN_4 A13
-#define IR_PIN_5 A11
+#define IR_PIN_5 A3
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
 #define TIME_OFF  20    //In Seconds (At least 30s)
 

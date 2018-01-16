@@ -110,6 +110,7 @@ void loop() {
   int pwm_input;
   float keep;
   float delay_time;
+  n_time = millis();
   
   if(Serial.available()){
     vals[k] = serialNumVal();
@@ -120,7 +121,8 @@ void loop() {
       k=0;
       exit;
     }
-    if(k_time-n_time>100000){
+    if(k_time-n_time>30000){
+      Serial.println("k");
       k=0;
       exit;
     }
