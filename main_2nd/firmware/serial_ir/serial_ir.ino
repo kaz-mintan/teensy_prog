@@ -1,6 +1,6 @@
 //#include <Servo.h>
 //Global variables
-#define IR_PIN A11
+#define IR_PIN A13
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
 #define TIME_OFF  20    //In Seconds (At least 30s)
 
