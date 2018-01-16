@@ -12,7 +12,7 @@ def linear_state(single_state):
     #print('line/single_state',single_state.shape[0])
     #print('line/single_state',single_state.shape[1])
     a = np.zeros((single_state.shape[0],1))
-    for i in range(single_state.shape[1]):
+    for i in range(single_state.shape[0]):
         x = np.linspace(0,1,single_state[i,:].shape[0])
         #fitting
         b, c = np.polyfit(x, single_state[i,:], 1)
@@ -40,7 +40,9 @@ if __name__ == '__main__':
     type_face = 5
     type_ir = 5
 
-    state = np.random.rand((type_face+type_ir,5))
-    #state = np.zeros((type_face+type_ir,5))
+    state = np.zeros((type_face+type_ir,3))
+    state[:,0]=np.array([2,3,1,2,3,4,2,3,1,12])
+    state[:,1]=np.array([3,3,1,2,3,4,2,3,1,1])
+    state[:,2]=np.array([4,3,1,2,3,4,2,3,1,-10])
     print(linear_state(state))
 
