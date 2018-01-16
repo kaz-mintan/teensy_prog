@@ -2,7 +2,7 @@
 import numpy as np
 
 def convert_action(action):
-    pwm_input = 40*action[0]+40
+    pwm_input = 50*action[0]+50
     keep = 1.5*action[1]+0.5
     delay = 1.5*action[2] + 0.5
     print('action',pwm_input,keep,delay)
