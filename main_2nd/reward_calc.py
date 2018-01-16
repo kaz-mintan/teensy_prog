@@ -8,7 +8,6 @@ type_ir = 5
 
 def f(face):
     face_next = face[:,1:] #for delta mode
-    print(face_next-face[:,:face.shape[1]-1])
     do_sum = np.sum(face_next-face[:,:face.shape[1]-1],axis=1)
 
     return do_sum
@@ -18,15 +17,16 @@ def g(face):
     return amp_sum
 
 def reward_function(state, state_predict, state_before, mode):
-    # coefficient
+    # extract face array (must be time sequence data)
     face = state[0:num_face,:] #in numpy, the 5 of the 0:5 is not included
 
-    c = np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
+    # coefficient
+    c_f = np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
+    c_g = np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
     h = np.array([0,70.0,70.0,-70.0,-70.0]) #for heuristic mode
-    reward = 0
 
-    # extract face array (must be time sequence data)
     T_duration = float(face.shape[1])
+    reward = c_f*f(face)+c_g*g(face)
 
     return reward
 
@@ -36,5 +36,6 @@ if __name__ == "__main__" :
     state_ran = np.random.rand(type_face+type_ir,4)
     print('state_ran',state_ran)
     #state_ran = np.random.rand(5,5)
-    print(f(np.array(state_ran[0:num_face,:])))
-    print(g(np.array(state_ran[0:num_face,:])))
+    print('f(state)',f(np.array(state_ran[0:num_face,:])))
+    print('g(state)',g(np.array(state_ran[0:num_face,:])))
+    print(reward_function(state_ran,state,state,'heuristic'))
