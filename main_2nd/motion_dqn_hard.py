@@ -141,7 +141,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     print('action',(convert_action(action[:,episode])))
     action_array = convert_action(action[:,episode])
     sma_act.send_para(convert_action(action[:,episode]))
-    sma_act.send_para(convert_action(action[:,episode]))
 
     reward_wait= True
     rewhile_t = 1
