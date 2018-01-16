@@ -26,7 +26,7 @@ def reward_function(state, state_predict, state_before, mode):
     h = np.array([0,70.0,70.0,-70.0,-70.0]) #for heuristic mode
 
     T_duration = float(face.shape[1])
-    reward = c_f*f(face)+c_g*g(face)
+    reward = np.sum(c_f*f(face)+c_g*g(face))
 
     return reward
 
