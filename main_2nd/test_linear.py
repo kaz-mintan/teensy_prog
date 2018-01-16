@@ -20,7 +20,8 @@ def linear_state(single_state):
         #fitting line
         a[i,0] = atan(b)
 
-    return a
+    print('test_linear/a',a)
+    return a[:,0]
     #return a
 
 def check_thre(ir_sensor,thre):

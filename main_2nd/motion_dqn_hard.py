@@ -125,6 +125,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     # if the sensor is larger than the value of threshold, sma starts to move
     #state_mean[:,episode] = get_state_mean()#TODO
     print('main/state.T',state)
+    print('state_mean[:,episode]',state_mean[:,episode])
     state_mean[:,episode] = linear_state(state)#TODO
 
 
@@ -145,7 +146,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     ### calcurate r_{t}
     reward[episode+1] = calc_reward(state_reward, state_predict,
             state_before,t_window, mode)
-    print('acted',action[:,episode],'reward',reward[episode+1])
+    print('reward',reward[episode+1])
 
     #random[episode+1], action[:,episode+1],next_q = Q_func.gen_action(possible_a,
             #state_mean, episode,random_rate,action,reward,alpha)
