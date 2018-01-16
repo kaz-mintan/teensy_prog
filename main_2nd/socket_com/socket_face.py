@@ -20,7 +20,9 @@ class Get_face:
         ret = 0
         for t in range(self.num_face):
             if face_tmp_list[t]:
-                if face_tmp_list[t] == '':
+                if face_tmp_list[t].isdigit() == False:
+                #if face_tmp_list[t] == '':
+                #if isinstance(face_tmp_list[0],int) == False:
                     print('face_list',face_tmp_list)
                     print('break')
                     ret = 0
@@ -28,6 +30,7 @@ class Get_face:
                 else:
                     ret = 1
         if ret == 1:
+        #if isinstance(face_tmp_list[0],int) == True:
             face_int = map(int,face_tmp_list[0:5])
             for i in range(self.num_face):
                 #print('face_tmp_list',face_tmp_list[i])
