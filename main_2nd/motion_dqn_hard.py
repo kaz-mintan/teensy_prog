@@ -59,7 +59,8 @@ print('port_ir',ser_port_ir)
 state = np.zeros((type_face+type_ir,1))
 tmp_state = np.zeros((type_face+type_ir,1))
 state_mean = np.zeros((type_face+type_ir,num_episodes))
-state_reward = np.zeros((type_face+type_ir,t_window))
+state_reward = np.zeros((type_face+type_ir,1))
+state_reward_delay = np.zeros((type_face+type_ir,1))
 
 state_before = np.zeros_like(state) #for delta mode
 state_predict = np.zeros_like(state) #for predict mode
@@ -138,13 +139,19 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         numpy.savetxt(act_handle,tmp_log(np.hstack((random[episode],action[:,episode]))),fmt="%.5f",delimiter=",")
 
     print('action',(convert_action(action[:,episode])))
+    action_array = convert_action(action[:,episode])
+    sma_act.send_para(convert_action(action[:,episode]))
     sma_act.send_para(convert_action(action[:,episode]))
 
     reward_wait= True
     rewhile_t = 1
     start_time = datetime.now()
-    action_time = action[1,episode]*5+action[2,episode]*2#sec
+    reaction_delay_time = 0.5 #TODO at this point
+    action_end_time = action_array[1]*4+action_array[2]#sec
+    action_time = action_array[1]*5+action_array[2]*2 + 15#sec
     while reward_wait:
+        now_time = datetime.now()
+        delta_time = now_time - start_time
         #state[:,while_t]=get_val.ret_state()#TODO
         tmp_state[:,0] = get_val.ret_state()
         with open('test_reward_face.csv', 'a') as rf_handle:
@@ -153,8 +160,9 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         print('face as reward',tmp_state[:,0])
         state_reward=np.hstack((state_reward,tmp_state))
 
-        now_time = datetime.now()
-        delta_time = now_time - start_time
+        if delta_time.total_seconds() > reaction_delay_time\
+                and delta_time.total_seconds() < action_end_time:
+            state_reward_delay=np.hstack((state_reward_delay,tmp_state))
 
         if delta_time.total_seconds() > action_time:
             reward_wait = False
@@ -162,7 +170,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             rewhile_t+= 1
 
     ### calcurate r_{t}
-    reward[episode+1] = reward_function(state_reward, state_predict, state_before, mode)
+    reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode)
+    #reward[episode+1] = reward_function(state_reward, state_predict, state_before, mode)
     with open('test_reward.csv', 'a') as reward_handle:
         numpy.savetxt(reward_handle,tmp_log(np.hstack((reward[episode+1],np.array([episode+1])))),fmt="%.5f",delimiter=",")
 
@@ -177,5 +186,5 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                 #action, episode,p_teacher,reward,next_q, gamma, alpha)
 
     state_before = state
-    time.sleep(5)
+    time.sleep(3)
 
