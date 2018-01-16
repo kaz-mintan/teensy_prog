@@ -111,7 +111,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state = np.zeros((type_face+type_ir,1))
 
     wait = True
-    thre = 30
+    thre = 10
     wait_cycle = 5
 
     while_t = 1
@@ -162,6 +162,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         if delta_time.total_seconds() > reaction_delay_time\
                 and delta_time.total_seconds() < action_end_time:
             state_reward_delay=np.hstack((state_reward_delay,tmp_state))
+            with open('reward_extracted.csv', 'a') as rewext_handle:
+                numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,episode]),fmt="%.5f",delimiter=",")
 
         if delta_time.total_seconds() > action_time:
             reward_wait = False
@@ -185,5 +187,5 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                 #action, episode,p_teacher,reward,next_q, gamma, alpha)
 
     state_before = state
-    time.sleep(3)
+    time.sleep(5)
 
