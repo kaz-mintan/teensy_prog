@@ -2,9 +2,9 @@
 import numpy as np
 
 def convert_action(action):
-    pwm_input = 50*action[0]+10
-    keep = 1.5*action[1]+0.2
-    delay = 3.0*action[2] + 0.2
+    pwm_input = 40*action[0]+40
+    keep = 1.5*action[1]+0.5
+    delay = 1.5*action[2] + 0.5
     print('action',pwm_input,keep,delay)
     return np.array([pwm_input,keep,delay])
 
