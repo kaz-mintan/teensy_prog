@@ -125,8 +125,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     # if the sensor is larger than the value of threshold, sma starts to move
     #state_mean[:,episode] = get_state_mean()#TODO
-    print('main/state.T',state)
-    print('state_mean[:,episode]',state_mean[:,episode])
     state_mean[:,episode] = linear_state(state)#TODO
 
 
@@ -140,14 +138,18 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     reward_wait= True
     rewhile_t = 1
+    start_time = datetime.now()
+    action_time = action[1,episode]*4+action[2,episode] #sec
     while reward_wait:
         #state[:,while_t]=get_val.ret_state()#TODO
         tmp_state[:,0] = get_val.ret_state()
         print('state',tmp_state[:,0])
         state=np.hstack((state,tmp_state))
 
-        if check_thre(np.array(state[type_face:type_ir+type_face,rewhile_t]),thre)==1:
-            time.sleep(wait_time)
+        now_time = datetime.now()
+        delta_time = now_time - start_time
+
+        if delta_time.total_seconds() > action_time:
             reward_wait = False
         else:
             rewhile_t+= 1
