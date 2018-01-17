@@ -65,7 +65,10 @@ if __name__ == "__main__" :
 
     host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
     port = 50000 #クライアントと同じPORTをしてあげます
+    type_face = 5
+    type_ir = 5
 
     get = Get_face(host,port)
     while True:
         print(get.read_face())
+
