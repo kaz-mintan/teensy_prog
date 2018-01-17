@@ -147,7 +147,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     start_time = datetime.now()
     reaction_delay_time = 0.5 #TODO at this point
     action_end_time = action_array[1]*4+action_array[2]#sec
-    action_time = action_array[1]*5+action_array[2]*2 + 15#sec
+    action_time = action_array[1]*5+action_array[2]*2 + 7#sec
     while reward_wait:
         now_time = datetime.now()
         delta_time = now_time - start_time
