@@ -34,6 +34,9 @@ def extract_time(state_array):
 
     return state_array[type_face:type_face+num_timestamp]
 
+def dev_state_time(state_array):
+    return extract_state(state_array), extract_time(state_array)
+
 if __name__ == "__main__" :
     type_face = 5
     type_ir = 5
@@ -44,6 +47,7 @@ if __name__ == "__main__" :
     print(state[:,0])
     print(extract_state(state[:,0]))
     print(extract_time(state[:,0]))
+    print(dev_state_time(state[:,0]))
 
 
     ser_port = "/dev/ttyACM1"
