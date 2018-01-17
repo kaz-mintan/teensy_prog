@@ -23,8 +23,8 @@ class Get_face:
                 if face_tmp_list[t].isdigit() == False:
                 #if face_tmp_list[t] == '':
                 #if isinstance(face_tmp_list[0],int) == False:
-                    print('face_list',face_tmp_list)
-                    print('break')
+                    #print('face_list',face_tmp_list)
+                    #print('break')
                     ret = 0
                     return ret
                 else:

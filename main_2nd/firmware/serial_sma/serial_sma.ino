@@ -39,6 +39,8 @@ int serialNumVal() {
       i++;
       return 0;
     }
+  }else{
+	  return 0;
   }
 }
 

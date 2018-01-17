@@ -44,19 +44,22 @@ int serialNumVal() {
       i++;
       return 0;
     }
-  }else{
-	  return 0;
+  }
+  else{
+    return 0;
   }
 }
 
 int pin_no[5]={SMA_PIN_1,SMA_PIN_2,SMA_PIN_3,SMA_PIN_4,SMA_PIN_5};
 
 void act_sma(int pin_no, int deg){
+    Serial.println(pin_no);
     analogWrite(pin_no, map(deg, 0, 100, 0, 255));
     //delay(TIME_ON*1000);
 }
 
 void stop_sma(int pin_no){
+    Serial.println(pin_no);
     analogWrite(pin_no, 0);
 }
 
@@ -66,34 +69,38 @@ void send_all(int pwm_input,int keep,int delay_time){
 	int move_array[5]={0,0,0,0,0};
 
 	int stop_array[5]={keep*100,
-		delay_time*100+keep*100,
-		delay_time*2*100+keep*100,
-		delay_time*3*100+keep*100,
-		delay_time*4*100+keep*100};
+		delay_time*100+keep*103,
+		delay_time*2*100+keep*106,
+		delay_time*3*110+keep*110,
+		delay_time*4*110+keep*114};
 
 	int start_array[5]={0,
 		delay_time*100,
 		delay_time*2*100,
-		delay_time*3*100,
-		delay_time*4*100};
+		delay_time*3*95,
+		delay_time*4*95};
 
 	//act_sma(SMA_PIN_1,pwm_input);
 	unsigned long now_time;
   int dt;
 
   while(move_array[4]!=2){
+ 
     now_time = millis();
 	  dt = now_time - start_time;
 
   	for(i = 0; i<5; i++){
   		if(move_array[i]==0){
-  			if(dt>start_array[i]){
+          now_time = millis();
+          dt = now_time - start_time;
+  			if(dt>=start_array[i]){
   				act_sma(pin_no[i],pwm_input);
           move_array[i]=1;
   			}
   		}else if(move_array[i]==1){
-  			if(dt>stop_array[i]){
-
+         now_time = millis();
+         dt = now_time - start_time;
+  			if(dt>=stop_array[i]){
   				stop_sma(pin_no[i]);
   				move_array[i]=2;
   			}
@@ -123,11 +130,11 @@ void loop() {
       k=0;
       exit;
     }
-    if(k_time-n_time>30000){
-      Serial.println("k");
-      k=0;
-      exit;
-    }
+//    if(k_time-n_time>30000){
+//      Serial.println("k");
+//      k=0;
+//      exit;
+//    }
     //Serial.println(Serial.read());
     if(k>2){
       //*************

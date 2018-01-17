@@ -1,6 +1,7 @@
 # coding:utf-8
 # calculates reward based on recognized facial expression
 import numpy as np
+import math
 
 num_face = 5
 type_face = 5
@@ -19,15 +20,26 @@ def g(face):
 def reward_function(state, state_predict, state_before, mode):
     # extract face array (must be time sequence data)
     face = state[0:num_face,:] #in numpy, the 5 of the 0:5 is not included
-    print('reward_func',face)
 
     # coefficient
-    c_f = np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
+    c_f = 10*np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
     c_g = np.array([0,70.0,70.0,-70.0,-70.0]) #for delta mode
     h = np.array([0,70.0,70.0,-70.0,-70.0]) #for heuristic mode
 
     T_duration = float(face.shape[1])
-    reward = np.sum(c_f*f(face)+c_g*g(face))
+    #reward = np.sum(c_f*f(face)+c_g*g(face))
+
+    if mode == 'delta':
+        reward = np.sum(c_f*f(face))
+
+    elif mode == 'heuristic':
+        reward = np.sum(c_g*g(face))
+
+    elif mode == 'predict':
+        face_predict = state_predict[0:num_face,:] #for predict mode
+        e_face = face_predict[0,:type_face] - np.mean(face,axis=1)
+
+        reward = math.fabs(1.0/np.mean(e_face))
 
     return reward
 
