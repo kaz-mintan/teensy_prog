@@ -123,7 +123,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             numpy.savetxt(rf_handle,
                     tmp_log(np.hstack((np.array([episode]),
                         np.array([while_t]),
-                        tmp_state[:,0])),datetime.now()),fmt="%.2f",delimiter=",")
+                        tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
 
         state=np.hstack((state,tmp_state))
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1 and while_t > wait_cycle:
@@ -176,23 +176,24 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             with open('reward_extracted.csv', 'a') as rewext_handle:
                 #numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,episode]),fmt="%.5f",delimiter=",")
                 #numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,rewhile_t],datetime.now()),fmt="%.5f",delimiter=",")
-                numpy.savetxt(rewext_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%.3f",delimiter=",")
+                numpy.savetxt(rewext_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
 
         if delta_time.total_seconds() > action_time:
 
-        with open('test_action_stop.csv', 'a') as act_handle:
-            numpy.savetxt(act_handle,tmp_log(np.array([episode]),datetime.now()),fmt="%.3f",delimiter=",")
+            with open('test_action_stop.csv', 'a') as act_handle:
+                numpy.savetxt(act_handle,tmp_log(np.array([episode]),datetime.now()),fmt="%.3f",delimiter=",")
             reward_wait = False
         else:
             rewhile_t+= 1
 
-    #一番Happyの高いタイムスタンプと低いタイムスタンプを保存
+    #一番Happyの高いタイムスタンプと低いタイムスタンプ, and number of frameを保存
     stamp_reward = save_stamp(stamp_reward, time_reward, state_reward, episode+1)
 
     ### calcurate r_{t}
     reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode)
     with open('test_reward.csv', 'a') as reward_handle:
-        numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1],np.array([next_q]))),datetime.now()),fmt="%.5f",delimiter=",")
+        numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1])),datetime.now()),fmt="%.3f",delimiter=",")
+        #numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1],np.array([next_q]))),datetime.now()),fmt="%.3f",delimiter=",")
 
     q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
 
