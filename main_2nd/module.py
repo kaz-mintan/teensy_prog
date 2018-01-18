@@ -2,8 +2,8 @@
 import numpy as np
 
 def save_stamp(stamp_reward, time_reward, state_reward,episode):
-    stamp_reward[episode,0,:]=time_reward[:,np.argmax(state_reward[1,:])]
-    stamp_reward[episode,1,:]=time_reward[:,np.argmin(state_reward[1,:])]
+    stamp_reward[episode,0,:]=np.hstack((np.array([np.argmax(state_reward[1,:])]),time_reward[:,np.argmax(state_reward[1,:])]
+    stamp_reward[episode,1,:]=np.hstack((np.array([np.argmin(state_reward[1,:])]),time_reward[:,np.argmin(state_reward[1,:])]
     return stamp_reward
 
 if __name__ == '__main__':
