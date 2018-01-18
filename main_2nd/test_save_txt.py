@@ -9,6 +9,11 @@ def tmp_log(array,now):
             np.array([now.day,now.hour,now.minute,now.second,now.microsecond])
     return log_array
 
+def last_log(array):
+    log_array = np.empty((1,array.shape[0]))
+    log_array[0,:]=array
+    return log_array
+
 if __name__ == "__main__" :
     type_face = 5
     type_ir = 5
