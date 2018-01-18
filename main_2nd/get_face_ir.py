@@ -49,7 +49,6 @@ if __name__ == "__main__" :
     print(extract_time(state[:,0]))
     print(dev_state_time(state[:,0]))
 
-
     ser_port = "/dev/ttyACM1"
     ser_baud = 19200
 
