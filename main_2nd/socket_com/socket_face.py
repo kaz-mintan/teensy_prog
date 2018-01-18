@@ -43,20 +43,34 @@ class Get_face:
                     break
             return ret
 
+    def check_time(self,face_tmp_list):
+        ret = 0
+        #if isinstance(face_tmp_list[0],int) == True:
+        time_int = map(int,face_tmp_list[self.num_face:self.num_face+self.num_time])
+        for i in range(self.num_time):
+            #print('face_tmp_list',face_tmp_list[i])
+            if time_int[0]==0 and time_int[4]==0:
+                ret = 0
+                break
+            else:
+                ret = 1
+        return ret
+
+
+
     def read_face(self):
         get_face = np.zeros(self.num_face)
         tmp_time = np.zeros(self.num_time)
         get_time = np.zeros(self.num_time-self.milli+1)
         rcvmsg = self.clientsock.recv(1024)
         face = rcvmsg.split(",")
-        if self.check_face(face) == 1:
+        if self.check_face(face) == 1 and self.check_time(face) == 1:
             int_face = map(int,face[0:self.num_face+self.num_time])
             get_face = np.array(int_face[0:self.num_face])
             milli_num = int_face[-2]*10 + int_face[-1]
             get_time = np.hstack((np.array(int_face[self.num_face:self.num_face+self.num_time-self.milli]),np.array([milli_num])))
 
-            #print(get_face)
-        return get_face,get_time
+        return np.array(np.hstack((get_face,get_time)))
 
     def close():
         clientsock.close()
