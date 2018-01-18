@@ -2,7 +2,6 @@
 # http://neuro-educator.com/rl1/
 
 import numpy as np
-import matplotlib.pyplot as plt
 import sys
 
 #from sequence import *
@@ -28,10 +27,12 @@ from action_convert import *
 from reward_calc import *
 
 from test_save_txt import *
+from modules import *
 
 t_window = 10  #number of time window
 num_episodes = 50  #number of all trials
 
+num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
 type_ir = 5 #5 ir sensors
 type_action = 3 #3(pwm,keep,delay) times 5 sma sensors
@@ -60,13 +61,15 @@ state = np.zeros((type_face+type_ir,1))
 tmp_state = np.zeros((type_face+type_ir,1))
 state_mean = np.zeros((type_face+type_ir,num_episodes))
 state_reward = np.zeros((type_face+type_ir,1))
+time_reward = np.zeros((num_timestamp,1))
 state_reward_delay = np.zeros((type_face+type_ir,1))
+stamp_reward = np.zeros((num_episodes+1,2,num_timestamp))
 
 state_before = np.zeros_like(state) #for delta mode
 state_predict = np.zeros_like((type_face+type_ir,num_episodes)) #for predict mode
 
 action = np.zeros((type_action,num_episodes))
-reward = np.zeros(num_episodes)
+reward = np.zeros(num_episodes+1)
 random = np.zeros(num_episodes)
 
 #initialize action
@@ -116,7 +119,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     while_t = 1
     while wait:
-        tmp_state[:,0] = get_val.ret_state()
+        tmp_state[:,0] = extract_state(get_val.ret_state())#changed to extract
 
         print('fase/ir as state',tmp_state[:,0])
         state=np.hstack((state,tmp_state))
@@ -151,26 +154,32 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     while reward_wait:
         now_time = datetime.now()
         delta_time = now_time - start_time
-        #state[:,while_t]=get_val.ret_state()#TODO
-        tmp_state[:,0] = get_val.ret_state()
+        #check the episode is correct?
+        tmp_time[:,0], tmp_state[:,0] = dev_state_time(get_val.ret_state())
         with open('test_reward_face.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0]))),fmt="%.5f",delimiter=",")
 
         print('face as reward',tmp_state[:,0])
         state_reward=np.hstack((state_reward,tmp_state))
+        #check the episode is correct?
+        time_reward=np.hstack((state_reward,tmp_time))
 
         if delta_time.total_seconds() > reaction_delay_time\
                 and delta_time.total_seconds() < action_end_time:
             state_reward_delay=np.hstack((state_reward_delay,tmp_state))
             with open('reward_extracted.csv', 'a') as rewext_handle:
-                numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,episode]),fmt="%.5f",delimiter=",")
+                #numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,episode]),fmt="%.5f",delimiter=",")
+                numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,rewhile_t]),fmt="%.5f",delimiter=",")
 
         if delta_time.total_seconds() > action_time:
             reward_wait = False
         else:
             rewhile_t+= 1
 
+    #一番Happyの高いタイムスタンプと低いタイムスタンプを保存
     ### calcurate r_{t}
+    stamp_reward = save_stamp(stamp_reward, time_reward, state_reward, episode+1)
+
     reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode)
     #reward[episode+1] = reward_function(state_reward, state_predict, state_before, mode)
     with open('test_reward.csv', 'a') as reward_handle:
@@ -188,4 +197,19 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     state_before = state
     time.sleep(5)
+
+#output reward top and bottom 5 timestamps
+
+
+num_top = 5
+for i in range(1,num_top+1):
+    with open('question_picture.csv', 'a') as q_handle:
+        numpy.savetxt(q_handle,tmp_log(stamp_reward[np.argsort(reward)[-i],0,:]),fmt="%.5f",delimiter=",")
+        numpy.savetxt(q_handle,tmp_log(stamp_reward[np.argsort(reward)[i],1,:]),fmt="%.5f",delimiter=",")
+
+    #print(stamp_reward[np.argsort(reward)[-i],0,:])
+    #print(stamp_reward[np.argsort(reward)[i],1,:])
+
+#reward[n]の値が最も高いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
+#reward[n]の値が最も低いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
 
