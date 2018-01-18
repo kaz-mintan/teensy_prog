@@ -27,10 +27,11 @@ from action_convert import *
 from reward_calc import *
 
 from test_save_txt import *
-from modules import *
+from module import *
 
 t_window = 10  #number of time window
-num_episodes = 50  #number of all trials
+num_episodes = 5  #number of all trials
+num_top = 3
 
 num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
@@ -59,6 +60,7 @@ print('port_ir',ser_port_ir)
 # [5] main tourine
 state = np.zeros((type_face+type_ir,1))
 tmp_state = np.zeros((type_face+type_ir,1))
+tmp_time= np.zeros((num_timestamp,1))
 state_mean = np.zeros((type_face+type_ir,num_episodes))
 state_reward = np.zeros((type_face+type_ir,1))
 time_reward = np.zeros((num_timestamp,1))
@@ -84,20 +86,6 @@ q_hidden_size = (q_input_size + q_output_size )/2
 q_teacher = np.zeros((q_output_size,num_episodes))
 Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch, gamma, alpha)
 
-if mode == 'predict':
-    ## set predict function as nn
-    p_input_size = type_face + type_ir + type_action
-    p_output_size = type_face
-    p_hidden_size = (p_input_size + p_output_size )/3
-
-    p_teacher = np.zeros((p_output_size,num_episodes))
-
-    P_func = Neural(p_input_size, p_hidden_size, p_output_size, epsilon, mu, epoch,gamma, alpha)
-    p_first_iteacher = np.random.uniform(low=0,high=1,size=(p_input_size,1))
-    p_first_oteacher = np.random.uniform(low=0,high=1,size=(p_output_size,1))
-
-    P_func.train(p_first_iteacher.T,p_first_oteacher.T)
-
 # setting of serial com
 get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
 sma_act = send_3para.Act_sma(ser_port_sma,ser_baud)
@@ -108,22 +96,36 @@ save_files = Save_csv(datetime.now())
 state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
 state_reward[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
 
+start_time = 100
+wait_cycle = 5
+
+#start to output sensor data
+for st in range(start_time):
+    print(get_val.ret_state())
+
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
-
+    #####################################
+    # detect face and ir to decide action
+    #####################################
     state = np.zeros((type_face+type_ir,1))
 
     wait = True
     thre = 10
-    wait_cycle = 5
 
     while_t = 1
     while wait:
         tmp_state[:,0] = extract_state(get_val.ret_state())#changed to extract
 
         print('fase/ir as state',tmp_state[:,0])
-        state=np.hstack((state,tmp_state))
+        #TODO state_log
+        with open('test_reward_face.csv', 'a') as rf_handle:
+            numpy.savetxt(rf_handle,
+                    tmp_log(np.hstack((np.array([episode]),
+                        np.array([rewhile_t]),
+                        tmp_state[:,0]))),fmt="%.5f",delimiter=",")
 
+        state=np.hstack((state,tmp_state))
         if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1 and while_t > wait_cycle:
             wait = False
         else:
@@ -155,14 +157,14 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         now_time = datetime.now()
         delta_time = now_time - start_time
         #check the episode is correct?
-        tmp_time[:,0], tmp_state[:,0] = dev_state_time(get_val.ret_state())
+        tmp_state[:,0], tmp_time[:,0]  = dev_state_time(get_val.ret_state())
         with open('test_reward_face.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0]))),fmt="%.5f",delimiter=",")
 
         print('face as reward',tmp_state[:,0])
         state_reward=np.hstack((state_reward,tmp_state))
         #check the episode is correct?
-        time_reward=np.hstack((state_reward,tmp_time))
+        time_reward=np.hstack((time_reward,tmp_time))
 
         if delta_time.total_seconds() > reaction_delay_time\
                 and delta_time.total_seconds() < action_end_time:
@@ -190,18 +192,12 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
     #q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,next_q, gamma, alpha)
 
-    if mode == 'predict':
-        state_predict, p_teacher = P_func.predict_update(state_mean,state_predict,
-                action, episode,p_teacher,reward,next_q)
-                #action, episode,p_teacher,reward,next_q, gamma, alpha)
-
     state_before = state
     time.sleep(5)
 
 #output reward top and bottom 5 timestamps
 
 
-num_top = 5
 for i in range(1,num_top+1):
     with open('question_picture.csv', 'a') as q_handle:
         numpy.savetxt(q_handle,tmp_log(stamp_reward[np.argsort(reward)[-i],0,:]),fmt="%.5f",delimiter=",")
