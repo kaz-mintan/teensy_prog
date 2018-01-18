@@ -31,7 +31,7 @@ from module import *
 
 t_window = 10  #number of time window
 num_episodes = 5  #number of all trials
-num_top = 3
+num_top = 2
 
 num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
@@ -65,7 +65,7 @@ state_mean = np.zeros((type_face+type_ir,num_episodes))
 state_reward = np.zeros((type_face+type_ir,1))
 time_reward = np.zeros((num_timestamp,1))
 state_reward_delay = np.zeros((type_face+type_ir,1))
-stamp_reward = np.zeros((num_episodes+1,2,num_timestamp+1))
+stamp_reward = np.zeros((num_episodes-1,2,num_timestamp+1))
 
 state_before = np.zeros_like(state) #for delta mode
 state_predict = np.zeros_like((type_face+type_ir,num_episodes)) #for predict mode
@@ -77,7 +77,6 @@ random = np.zeros(num_episodes)
 #initialize action
 action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
 possible_a = np.linspace(0,1,10)
-print('shape',possible_a.shape[0])
 
 ## set qfunction as nn
 q_input_size = type_face + type_ir + type_action
@@ -93,8 +92,8 @@ sma_act = send_3para.Act_sma(ser_port_sma,ser_baud)
 #for save files
 save_files = Save_csv(datetime.now())
 
-state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
-state_reward[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
+#state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
+#state_reward[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
 
 start_time = 100
 wait_cycle = 5
@@ -174,8 +173,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             state_reward_delay=np.hstack((state_reward_delay,tmp_state))
 
             with open('reward_extracted.csv', 'a') as rewext_handle:
-                #numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,episode]),fmt="%.5f",delimiter=",")
-                #numpy.savetxt(rewext_handle,tmp_log(state_reward_delay[:,rewhile_t],datetime.now()),fmt="%.5f",delimiter=",")
                 numpy.savetxt(rewext_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
 
         if delta_time.total_seconds() > action_time:
@@ -187,7 +184,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             rewhile_t+= 1
 
     #一番Happyの高いタイムスタンプと低いタイムスタンプ, and number of frameを保存
-    stamp_reward = save_stamp(stamp_reward, time_reward, state_reward, episode+1)
+    stamp_reward = save_stamp(stamp_reward, time_reward, state_reward_delay, episode)
+    print('stamp_reward',stamp_reward)
 
     ### calcurate r_{t}
     reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode)
@@ -201,10 +199,15 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     time.sleep(5)
 
 #output reward top and bottom 5 timestamps
+print(stamp_reward)
+print('reward',reward)
 for i in range(1,num_top+1):
     with open('question_picture.csv', 'a') as q_handle:
-        numpy.savetxt(q_handle,last_log(np.hstack((np.array([episode,reward[np.argsort(reward)[-i]]]),stamp_reward[np.argsort(reward)[-i],0,:]))),fmt="%d",delimiter=",")
-        numpy.savetxt(q_handle,last_log(np.hstack((np.array([episode,reward[np.argsort(reward)[i]]]),stamp_reward[np.argsort(reward)[i],0,:]))),fmt="%d",delimiter=",")
+        numpy.savetxt(q_handle,
+                last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:]))),fmt="%d",delimiter=",")
+        print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:])
+        print(np.argsort(reward)[i],stamp_reward[np.argsort(reward[1:num_episodes-1])[i]+1,1,:])
+        numpy.savetxt(q_handle,last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[i]+1,1,:]))),fmt="02%d",delimiter=",")
 
 #reward[n]の値が最も高いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
 #reward[n]の値が最も低いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
