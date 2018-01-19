@@ -24,13 +24,15 @@ def linear_state(single_state):
 
 def check_thre(ir_sensor,thre):
     ret = -1
+    ir_no = -1
     for i in range(type_ir):
         if ir_sensor[i]<thre:
             ret = 1
+            ir_no = i
             break
         else:
             ret = 0
-    return ret
+    return ir_no, ret
 
 if __name__ == '__main__':
     print('input a to test atan')
