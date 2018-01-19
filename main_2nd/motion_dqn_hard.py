@@ -78,8 +78,13 @@ reward = np.zeros(num_episodes+1)
 random = np.zeros(num_episodes)
 
 #initialize action
-action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
-possible_a = np.linspace(0,1,30)
+
+action[:,0] = np.array([np.random.uniform(0,1),
+        np.random.uniform(0,1),
+        np.random.uniform(0,1),
+        np.random.uniform(0,1),
+        np.random.uniform(0,1)])
+possible_a = np.linspace(0,1,10)
 
 ## set qfunction as nn
 q_input_size = type_face + state_ir + type_action
@@ -90,7 +95,7 @@ Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch, 
 
 # setting of serial com
 get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
-sma_act = send_3para.Act_sma(ser_port_sma,ser_baud)
+sma_act = send_4para.Act_sma(ser_port_sma,ser_baud)
 
 #for save files
 save_files = Save_csv(datetime.now())
