@@ -128,16 +128,41 @@ void send_all(int pwm_input,int keep,int delay_time, int order_array[2][5]){
   }
 }
 
-int vals[3];
+int vals[4];
 int k = 0;
 unsigned long k_time;
 unsigned long n_time;
+
+int order_array[22][2][5] =  {{{4,3,2,1,0},{-1,-1,-1,-1,-1}}, //0 single close
+        {{0,1,2,3,4},{-1,-1,-1,-1,-1}}, //0 single apart
+        {{4,3,2,1,-1},{-1,-1,-1,-1,-1}}, //1 single close
+        {{0,1,-1,-1,-1},{-1,-1,-1,-1,-1}}, 
+        {{1,2,3,4,-1},{-1,-1,-1,-1,-1}},//1 single apart
+        {{1,0,-1,-1,-1},{-1,-1,-1,-1,-1}},
+        {{4,3,2,1,-1},{-1,-1,0,-1,-1}},//1 double close
+        {{1,2,3,4,-1},{-1,0,-1,-1,-1}},//1 double apart
+        {{0,1,2,-1,-1},{-1,-1,-1,-1,-1}},//2 single close
+        {{4,3,2,-1,-1},{-1,-1,-1,-1,-1}},
+        {{2,1,0,-1,-1},{-1,-1,-1,-1,-1}},//2 single apart
+        {{2,3,4,-1,-1},{-1,-1,-1,-1,-1}}, 
+        {{0,1,2,-1,-1},{4,3,-1,-1,-1}},//2 double close
+        {{2,1,0,-1,-1},{-1,3,4,-1,-1}},//2 double apart
+        {{0,1,2,3,-1},{-1,-1,-1,-1,-1}},  //3 single close  
+        {{4,3,-1,-1,-1},{-1,-1,-1,-1,-1}},  
+        {{3,2,1,0,-1},{-1,-1,-1,-1,-1}},  //3 single apart  
+        {{3,4,-1,-1,-1},{-1,-1,-1,-1,-1}},  
+        {{0,1,2,3,-1},{-1,-1,4,-1,-1}}, //3 double close  
+        {{3,2,1,0,-1},{-1,4,-1,-1,-1}}, //3 double apart
+        {{0,1,2,3,4},{-1,-1,-1,-1,-1}}, //4 single close  
+        {{4,3,2,1,0},{-1,-1,-1,-1,-1}}};  //4 single apart
+
 // メインループ
 void loop() {
   int pwm_input;
   float keep;
   float delay_time;
-  int order_array[2][5]={{2,3,4,-1,-1},{-1,1,0,-1,-1}};
+  int array_num;
+
 //  int order_array[2][5]={{0,1,2,3,4},{-1,-1,-1,-1,-1}};
   n_time = millis();
   
@@ -150,12 +175,13 @@ void loop() {
       k=0;
       exit;
     }
-    if(k>2){
+    if(k>3){
       //*************
       pwm_input = vals[0];
       keep = vals[1];
       delay_time = vals[2];
-      send_all(pwm_input,keep,delay_time,order_array);
+      array_num = vals[3]-1;
+      send_all(pwm_input,keep,delay_time,order_array[array_num]);
       delay((keep+delay_time)*100);
       //*************
       int vals[3];
@@ -163,6 +189,7 @@ void loop() {
       pwm_input = 0;
       keep = 0;
       delay_time = 0;
+      array_num = 0;
     }
   }
 }
