@@ -10,7 +10,7 @@ from serial_pc import *
 
 from get_face_ir import *
 from serial_com import serial_sma
-from serial_com import send_3para
+from serial_com import send_4para
 
 import time
 from datetime import datetime
@@ -37,7 +37,7 @@ num_top = 2
 num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
 type_ir = 5 #5 ir sensors
-type_action = 3 #3(pwm,keep,delay) times 5 sma sensors
+type_action = 5 #3(pwm,delay,base,num,direction) times 5 sma sensors
 state_ir = 2 #number of argument of state(ir sensor)
 
 gamma = 0.9
