@@ -77,7 +77,7 @@ void send_all(int pwm_input,int keep,int delay_time, int order_array[2][5]){
 		delay_time*100+keep*103,
 		delay_time*2*100+keep*106,
 		delay_time*3*110+keep*110,
-		delay_time*4*110+keep*114};
+		delay_time*4*110+keep*110};
 
 	int start_array[5]={0,
 		delay_time*100,

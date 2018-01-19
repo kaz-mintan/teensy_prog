@@ -84,7 +84,7 @@ action[:,0] = np.array([np.random.uniform(0,1),
         np.random.uniform(0,1),
         np.random.uniform(0,1),
         np.random.uniform(0,1)])
-possible_a = np.linspace(0,1,10)
+possible_a = np.linspace(0,1,5)
 
 ## set qfunction as nn
 q_input_size = type_face + state_ir + type_action
@@ -98,7 +98,7 @@ get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
 sma_act = send_4para.Act_sma(ser_port_sma,ser_baud)
 
 #for save files
-save_files = Save_csv(datetime.now())
+#save_files = Save_csv(datetime.now())
 
 start_time = 100
 wait_cycle = 5

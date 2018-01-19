@@ -17,7 +17,7 @@ def devide_base(analog_base):
 def devide_2(analog_num):
     if analog_num>=0 and analog_num<0.5:
         dig_num = 0
-    elif analog_base>=0.5 and analog_base<1.0:
+    elif analog_num>=0.5 and analog_num<1.0:
         dig_num= 1
     return dig_num
 
