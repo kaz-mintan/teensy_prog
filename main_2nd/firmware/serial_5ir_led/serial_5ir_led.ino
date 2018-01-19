@@ -11,7 +11,7 @@
 #define LED_PIN_2 10
 #define LED_PIN_3 22
 #define LED_PIN_4 23
-#define LED_PIN_5 25
+#define LED_PIN_5 32
 
 
 void setup() {
@@ -50,7 +50,7 @@ void brink(int no, int distance_input){
 
   if(distance_input<80 && distance_input>0){
     if(no==2){
-      analogWrite(pin_led[no], map(-distance_input+5, 0, 100, 0, 255));
+      analogWrite(pin_led[no], map(-distance_input+10, 0, 100, 0, 255));
     }else{
       analogWrite(pin_led[no], map(-distance_input+15, 0, 100, 0, 255));
     }
@@ -77,7 +77,7 @@ void loop() {
 	  ir_val[j] = ir_val[j]/100.0;
 	  distance[j] = 6762/(ir_val[j]-9)-4;
 //Serial.println("distance");
-Serial.println(distance[3]);
+Serial.println(distance[4]);
     brink(j,distance[j]);
   }
 
