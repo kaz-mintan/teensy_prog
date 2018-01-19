@@ -2,6 +2,8 @@
 import numpy as np
 
 def save_stamp(stamp_reward, time_reward, state_reward,episode):
+    print('state_reward',state_reward.shape)
+    print('time_reward',time_reward.shape)
     stamp_reward[episode,0,:]=\
             np.hstack((np.array([np.argmax(state_reward[1,2:])+2]),\
             time_reward[:,np.argmax(state_reward[1,2:])+2]))
