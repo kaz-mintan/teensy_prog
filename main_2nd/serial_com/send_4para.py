@@ -11,15 +11,16 @@ direction_type = 2
 
 
 def select_array_num(action):
+
     array=np.array([[[1,2],[1,2]],
         [[3,5],[7,8]],
         [[9,11],[13,14]],
         [[15,17],[19,20]],
         [[21,22],[21,22]]])
 
-    arg_base= action[2]
-    arg_num = action[3]
-    arg_direction = action[4]
+    arg_base= int(action[2])
+    arg_num = int(action[3])
+    arg_direction = int(action[4])
 
     return array[arg_base,arg_num,arg_direction]
 
@@ -41,6 +42,7 @@ class Act_sma:
         delay_val = int(float(action[1])*10)
         array_num = select_array_num(action)
         print(pwm_input,keep_val,delay_val,array_num)
+
         self.act(pwm_input)
         self.act(keep_val)
         self.act(delay_val)
@@ -59,15 +61,16 @@ if __name__ == '__main__':
     while True:
         print('input pwm')
         pwm = raw_input()
-        print('input keep')
-        keep = raw_input()
         print('input delay')
         delay = raw_input()
-        print('input aarray_num')
-        array_num = raw_input()
+        print('input base(from 0 to 4)')
+        base = raw_input()
+        print('input single(0) or double(1)')
+        num = raw_input()
+        print('input direction(close = 0, apart = 1)')
+        direction = raw_input()
 
-
-        serial_test.send_para(np.array([pwm,keep,delay,array_num]))
+        serial_test.send_para(np.array([pwm,delay,base,num,direction]))
         #serial_test.act(deg)
         #ser.write(str(deg)+'deg\0')
 
