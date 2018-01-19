@@ -104,18 +104,26 @@ for st in range(start_time):
 
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
-    #####################################
-    # detect face and ir to decide action
-    #####################################
+    ##########################################################################
+    ### detect face and ir to decide action
+    ##########################################################################
     state = np.zeros((type_face+type_ir,1))
     state_reward = np.zeros((type_face+type_ir,1))
     time_reward = np.zeros((num_timestamp,1))
 
+
     wait = True
     thre = 10
 
+    start_time_state = datetime.now()
+    random_action_time = 5#second
+
+
     while_t = 1
     while wait:
+        now_time_state = datetime.now()
+        delta_time_state = now_time_state - start_time_state
+
         tmp_state[:,0] = extract_state(get_val.ret_state())#changed to extract
 
         print('fase/ir as state',tmp_state[:,0])
@@ -127,8 +135,13 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
         state=np.hstack((state,tmp_state))
         ir_no, ret = check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)
+
         if ret ==1 and while_t > wait_cycle:
             wait = False
+            random_rate = 0
+        elif delta_time_state.total_seconds()>random_action_time:
+            wait = False
+            random_rate = 1
         else:
             while_t += 1
 
@@ -140,7 +153,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         numpy.savetxt(smean_handle,tmp_log(np.hstack((np.array([episode]),state_mean[:,episode])),datetime.now()),fmt="%.3f",delimiter=",")
 
     ### calcurate a_{t} based on s_{t}
-    random_rate = 0.3# * (1 / (episode + 1))
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
 
     print('action',(convert_action(action[:,episode])))
