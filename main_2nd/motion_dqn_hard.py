@@ -28,6 +28,7 @@ from reward_calc import *
 
 from test_save_txt import *
 from module import *
+from sequence import *
 
 t_window = 10  #number of time window
 num_episodes = 5  #number of all trials
@@ -37,6 +38,7 @@ num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
 type_ir = 5 #5 ir sensors
 type_action = 3 #3(pwm,keep,delay) times 5 sma sensors
+state_ir = 2 #number of argument of state(ir sensor)
 
 gamma = 0.9
 alpha = 0.5
@@ -61,14 +63,15 @@ print('port_ir',ser_port_ir)
 state = np.zeros((type_face+type_ir,1))
 tmp_state = np.zeros((type_face+type_ir,1))
 tmp_time= np.zeros((num_timestamp,1))
-state_mean = np.zeros((type_face+type_ir,num_episodes))
+
+state_mean = np.zeros((type_face+state_ir,num_episodes))
 state_reward = np.zeros((type_face+type_ir,1))
 time_reward = np.zeros((num_timestamp,1))
 state_reward_delay = np.zeros((type_face+type_ir,1))
 stamp_reward = np.zeros((num_episodes-1,2,num_timestamp+1))
 
 state_before = np.zeros_like(state) #for delta mode
-state_predict = np.zeros_like((type_face+type_ir,num_episodes)) #for predict mode
+state_predict = np.zeros_like((state)) #for predict mode
 
 action = np.zeros((type_action,num_episodes))
 reward = np.zeros(num_episodes+1)
@@ -76,10 +79,10 @@ random = np.zeros(num_episodes)
 
 #initialize action
 action[:,0] = np.array([np.random.uniform(0,1),np.random.uniform(0,1),np.random.uniform(0,1)])
-possible_a = np.linspace(0,1,10)
+possible_a = np.linspace(0,1,30)
 
 ## set qfunction as nn
-q_input_size = type_face + type_ir + type_action
+q_input_size = type_face + state_ir + type_action
 q_output_size = 1
 q_hidden_size = (q_input_size + q_output_size )/2
 q_teacher = np.zeros((q_output_size,num_episodes))
@@ -91,9 +94,6 @@ sma_act = send_3para.Act_sma(ser_port_sma,ser_baud)
 
 #for save files
 save_files = Save_csv(datetime.now())
-
-#state[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
-#state_reward[:,0]=np.array([0,0,0,0,0,0,0,0,0,0])
 
 start_time = 100
 wait_cycle = 5
@@ -108,6 +108,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     # detect face and ir to decide action
     #####################################
     state = np.zeros((type_face+type_ir,1))
+    state_reward = np.zeros((type_face+type_ir,1))
+    time_reward = np.zeros((num_timestamp,1))
 
     wait = True
     thre = 10
@@ -117,7 +119,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         tmp_state[:,0] = extract_state(get_val.ret_state())#changed to extract
 
         print('fase/ir as state',tmp_state[:,0])
-        #TODO state_log
         with open('test_state.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,
                     tmp_log(np.hstack((np.array([episode]),
@@ -125,13 +126,16 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                         tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
 
         state=np.hstack((state,tmp_state))
-        if check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)==1 and while_t > wait_cycle:
+        ir_no, ret = check_thre(np.array(state[type_face:type_ir+type_face,while_t]),thre)
+        if ret ==1 and while_t > wait_cycle:
             wait = False
         else:
             while_t += 1
 
     # if the sensor is larger than the value of threshold, sma starts to move
-    state_mean[:,episode] = linear_state(state)#TODO
+    state_mean[:,episode] = seq2feature(state_mean[:,episode], state, ir_no,type_face)#TODO
+    #TODO waiting
+
     with open('test_state_mean.csv', 'a') as smean_handle:
         numpy.savetxt(smean_handle,tmp_log(np.hstack((np.array([episode]),state_mean[:,episode])),datetime.now()),fmt="%.3f",delimiter=",")
 
@@ -145,7 +149,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     #save data of action
     with open('test_action_start.csv', 'a') as act_handle:
-        numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],action[:,episode])),datetime.now()),fmt="%.3f",delimiter=",")
+        numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],convert_action(action[:,episode]))),datetime.now()),fmt="%.3f",delimiter=",")
 
     reward_wait= True
     rewhile_t = 1
@@ -156,16 +160,17 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     while reward_wait:
         now_time = datetime.now()
         delta_time = now_time - start_time
-        #check the episode is correct?
-        tmp_state[:,0], tmp_time[:,0]  = dev_state_time(get_val.ret_state())
+        #########
+        # get face
+        #########
 
+        tmp_state[:,0], tmp_time[:,0]  = dev_state_time(get_val.ret_state())
         #save data to calculate reward all
         with open('test_reward_face.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%.3f",delimiter=",")
 
-        print('face as reward',tmp_state[:,0])
+        print('face as reward',tmp_time[:,0])
         state_reward=np.hstack((state_reward,tmp_state))
-        #check the episode is correct?
         time_reward=np.hstack((time_reward,tmp_time))
 
         if delta_time.total_seconds() > reaction_delay_time\
@@ -191,7 +196,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode)
     with open('test_reward.csv', 'a') as reward_handle:
         numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1])),datetime.now()),fmt="%.3f",delimiter=",")
-        #numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1],np.array([next_q]))),datetime.now()),fmt="%.3f",delimiter=",")
 
     q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
 
@@ -207,7 +211,7 @@ for i in range(1,num_top+1):
                 last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:]))),fmt="%d",delimiter=",")
         print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:])
         print(np.argsort(reward)[i],stamp_reward[np.argsort(reward[1:num_episodes-1])[i]+1,1,:])
-        numpy.savetxt(q_handle,last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[i]+1,1,:]))),fmt="02%d",delimiter=",")
+        numpy.savetxt(q_handle,last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[i]+1,1,:]))),fmt="%d",delimiter=",")
 
 #reward[n]の値が最も高いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
 #reward[n]の値が最も低いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
