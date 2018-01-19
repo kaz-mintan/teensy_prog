@@ -3,22 +3,22 @@ import numpy as np
 
 def devide_base(analog_base):
     if analog_base>=0 and analog_base<0.2:
-        dib_base = 0
+        dig_base = 0
     elif analog_base>=0.2 and analog_base<0.4:
-        dib_base = 1
+        dig_base = 1
     elif analog_base>=0.4 and analog_base<0.6:
-        dib_base = 2
+        dig_base = 2
     elif analog_base>=0.6 and analog_base<0.8:
-        dib_base = 3
+        dig_base = 3
     elif analog_base>=0.8 and analog_base<1.0:
-        dib_base = 4
+        dig_base = 4
     return dig_base
 
 def devide_2(analog_num):
     if analog_num>=0 and analog_num<0.5:
-        dib_num = 0
+        dig_num = 0
     elif analog_base>=0.5 and analog_base<1.0:
-        dib_num= 1
+        dig_num= 1
     return dig_num
 
 def convert_action(action):
