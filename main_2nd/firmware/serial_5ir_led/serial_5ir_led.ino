@@ -82,7 +82,7 @@ Serial.println(distance[4]);
   }
 
 
-  //sendIntData(distance);
+  sendIntData(distance);
   //delay(500);
   //Serial.println(distance);
 }
