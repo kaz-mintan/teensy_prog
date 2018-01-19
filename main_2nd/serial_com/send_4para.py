@@ -38,7 +38,7 @@ class Act_sma:
         pwm_input = action[0]
         keep_val = int(float(action[1])*10)
         delay_val = int(float(action[2])*10)
-        array_num = action[3]
+        array_num = select_array_num(action)
         print(pwm_input,keep_val,delay_val,array_num)
         self.act(pwm_input)
         self.act(keep_val)
