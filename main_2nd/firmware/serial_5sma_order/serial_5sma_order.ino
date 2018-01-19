@@ -4,7 +4,7 @@
 #define TIME_ON   1.5   //In Seconds (Less than 2s)
 #define TIME_OFF_CO  0.125    //In Seconds (At least 30s)
 
-#define SMA_PIN_1   9     //Pin # for SMA PWM on P2
+#define SMA_PIN_1   9     //Pin # forj SMA PWM on P2
 #define SMA_PIN_2   10     //Pin # for SMA PWM on P2
 #define SMA_PIN_3   22     //Pin # for SMA PWM on P2
 #define SMA_PIN_4   23     //Pin # for SMA PWM on P2
@@ -52,6 +52,10 @@ int serialNumVal() {
 
 int pin_no[5]={SMA_PIN_1,SMA_PIN_2,SMA_PIN_3,SMA_PIN_4,SMA_PIN_5};
 
+//int order_array[2][5]={{5,4,3,2,-1;},{1,2,-1,-1,-1,}}
+int order_array[5]={1,4,3,2,0};
+
+
 void act_sma(int pin_no, int deg){
     Serial.println(pin_no);
     analogWrite(pin_no, map(deg, 0, 100, 0, 255));
@@ -83,6 +87,7 @@ void send_all(int pwm_input,int keep,int delay_time){
 	//act_sma(SMA_PIN_1,pwm_input);
 	unsigned long now_time;
   int dt;
+  int t;
 
   while(move_array[4]!=2){
  
@@ -90,18 +95,19 @@ void send_all(int pwm_input,int keep,int delay_time){
 	  dt = now_time - start_time;
 
   	for(i = 0; i<5; i++){
+		t = order_array[i];
   		if(move_array[i]==0){
           now_time = millis();
           dt = now_time - start_time;
   			if(dt>=start_array[i]){
-  				act_sma(pin_no[i],pwm_input);
+  				act_sma(pin_no[t],pwm_input);
           move_array[i]=1;
   			}
   		}else if(move_array[i]==1){
          now_time = millis();
          dt = now_time - start_time;
   			if(dt>=stop_array[i]){
-  				stop_sma(pin_no[i]);
+  				stop_sma(pin_no[t]);
   				move_array[i]=2;
   			}
   		}
