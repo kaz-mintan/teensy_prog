@@ -53,7 +53,7 @@ int serialNumVal() {
 int pin_no[5]={SMA_PIN_1,SMA_PIN_2,SMA_PIN_3,SMA_PIN_4,SMA_PIN_5};
 
 //int order_array[2][5]={{5,4,3,2,-1;},{1,2,-1,-1,-1,}}
-int order_array[5]={1,4,3,2,0};
+
 
 
 void act_sma(int pin_no, int deg){
@@ -67,7 +67,8 @@ void stop_sma(int pin_no){
     analogWrite(pin_no, 0);
 }
 
-void send_all(int pwm_input,int keep,int delay_time){
+void send_all(int pwm_input,int keep,int delay_time, int order_array[2][5]){
+  
 	int i = 0;
 	unsigned long start_time = millis();
 	int move_array[5]={0,0,0,0,0};
@@ -87,7 +88,7 @@ void send_all(int pwm_input,int keep,int delay_time){
 	//act_sma(SMA_PIN_1,pwm_input);
 	unsigned long now_time;
   int dt;
-  int t;
+  int t_1,t_2;
 
   while(move_array[4]!=2){
  
@@ -95,19 +96,30 @@ void send_all(int pwm_input,int keep,int delay_time){
 	  dt = now_time - start_time;
 
   	for(i = 0; i<5; i++){
-		t = order_array[i];
+		t_1 = order_array[0][i];
+    t_2 = order_array[1][i];
   		if(move_array[i]==0){
           now_time = millis();
           dt = now_time - start_time;
   			if(dt>=start_array[i]){
-  				act_sma(pin_no[t],pwm_input);
+          if(t_1!=-1){
+  				  act_sma(pin_no[t_1],pwm_input);
+          }
+          if(t_2!=-1){
+            act_sma(pin_no[t_2],pwm_input);
+          }
           move_array[i]=1;
   			}
   		}else if(move_array[i]==1){
          now_time = millis();
          dt = now_time - start_time;
   			if(dt>=stop_array[i]){
-  				stop_sma(pin_no[t]);
+          if(t_1!=-1){
+  				  stop_sma(pin_no[t_1]);
+          }
+          if(t_2!=-1){
+            stop_sma(pin_no[t_2]);
+          }
   				move_array[i]=2;
   			}
   		}
@@ -125,6 +137,8 @@ void loop() {
   int pwm_input;
   float keep;
   float delay_time;
+  int order_array[2][5]={{2,3,4,-1,-1},{-1,1,0,-1,-1}};
+//  int order_array[2][5]={{0,1,2,3,4},{-1,-1,-1,-1,-1}};
   n_time = millis();
   
   if(Serial.available()){
@@ -136,18 +150,12 @@ void loop() {
       k=0;
       exit;
     }
-//    if(k_time-n_time>30000){
-//      Serial.println("k");
-//      k=0;
-//      exit;
-//    }
-    //Serial.println(Serial.read());
     if(k>2){
       //*************
       pwm_input = vals[0];
       keep = vals[1];
       delay_time = vals[2];
-      send_all(pwm_input,keep,delay_time);
+      send_all(pwm_input,keep,delay_time,order_array);
       delay((keep+delay_time)*100);
       //*************
       int vals[3];
