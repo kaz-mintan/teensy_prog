@@ -20,6 +20,7 @@ def select_array_num(action):
     arg_base= action[2]
     arg_num = action[3]
     arg_direction = action[4]
+
     return array[arg_base,arg_num,arg_direction]
 
 class Act_sma:
@@ -36,8 +37,8 @@ class Act_sma:
     #def send_para(self, pwm_input,keep,delay_time):
     def send_para(self, action):
         pwm_input = action[0]
-        keep_val = int(float(action[1])*10)
-        delay_val = int(float(action[2])*10)
+        keep_val = 30
+        delay_val = int(float(action[1])*10)
         array_num = select_array_num(action)
         print(pwm_input,keep_val,delay_val,array_num)
         self.act(pwm_input)
