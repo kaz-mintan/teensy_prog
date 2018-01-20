@@ -10,20 +10,6 @@ num_type = 2
 direction_type = 2
 
 
-def select_array_num(action):
-
-    array=np.array([[[1,2],[1,2]],
-        [[3,5],[7,8]],
-        [[9,11],[13,14]],
-        [[15,17],[19,20]],
-        [[21,22],[21,22]]])
-
-    arg_base= int(action[2])
-    arg_num = int(action[3])
-    arg_direction = int(action[4])
-
-    return array[arg_base,arg_num,arg_direction]
-
 class Act_sma:
     def __init__(self, port, baud):
         # シリアル通信の設定(
@@ -40,7 +26,7 @@ class Act_sma:
         pwm_input = action[0]
         keep_val = 30
         delay_val = int(float(action[1])*10)
-        array_num = select_array_num(action)
+        array_num = action[2]
         print(pwm_input,keep_val,delay_val,array_num)
 
         self.act(pwm_input)
