@@ -158,20 +158,20 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     ### calcurate a_{t} based on s_{t}
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
 
-    print('action',(convert_action(action[:,episode])))
+    print('action',(convert_action(action[:,episode],ir_no)))
     action_array = convert_action(action[:,episode],ir_no)
-    sma_act.send_para(convert_action(action[:,episode]))
+    sma_act.send_para(convert_action(action[:,episode],ir_no))
 
     #save data of action
     with open('test_action_start.csv', 'a') as act_handle:
-        numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],convert_action(action[:,episode]))),datetime.now()),fmt="%.3f",delimiter=",")
+        numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],convert_action(action[:,episode],ir_no))),datetime.now()),fmt="%.3f",delimiter=",")
 
     reward_wait= True
     rewhile_t = 1
     start_time = datetime.now()
     reaction_delay_time = 0.5 #TODO at this point
-    action_end_time = action_array[1]*4+action_array[2]#sec
-    action_time = action_array[1]*5+action_array[2]*2 + 7#sec
+    action_end_time = 3*4+action_array[1]#sec
+    action_time = 3*5+action_array[1]*2 + 7#sec
     while reward_wait:
         now_time = datetime.now()
         delta_time = now_time - start_time
