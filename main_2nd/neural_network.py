@@ -89,7 +89,7 @@ class Neural:
         dim_num = 3
         val = float(possible_a.shape[0])
         if episode != 0:
-            for a,b,c,d,e in itertools.product(range(possible_a.shape[0]),repeat=dim_num):
+            for a,b,c in itertools.product(range(possible_a.shape[0]),repeat=dim_num):
                 array = numpy.hstack((possible_a[a],possible_a[b],possible_a[c]))
 
                 p_array[:,0]=numpy.hstack((state_mean[:,episode+1],array))
