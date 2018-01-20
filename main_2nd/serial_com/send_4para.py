@@ -49,14 +49,10 @@ if __name__ == '__main__':
         pwm = raw_input()
         print('input delay')
         delay = raw_input()
-        print('input base(from 0 to 4)')
-        base = raw_input()
-        print('input single(0) or double(1)')
+        print('input array number (from 1 to 22)')
         num = raw_input()
-        print('input direction(close = 0, apart = 1)')
-        direction = raw_input()
 
-        serial_test.send_para(np.array([pwm,delay,base,num,direction]))
+        serial_test.send_para(np.array([pwm,delay,num]))
         #serial_test.act(deg)
         #ser.write(str(deg)+'deg\0')
 
