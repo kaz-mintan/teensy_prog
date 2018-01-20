@@ -37,7 +37,7 @@ num_top = 2
 num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
 type_ir = 5 #5 ir sensors
-type_action = 5 #3(pwm,delay,base,num,direction) times 5 sma sensors
+type_action =3 #3(pwm,delay,num of array)
 state_ir = 2 #number of argument of state(ir sensor)
 
 gamma = 0.9
@@ -81,10 +81,8 @@ random = np.zeros(num_episodes)
 
 action[:,0] = np.array([np.random.uniform(0,1),
         np.random.uniform(0,1),
-        np.random.uniform(0,1),
-        np.random.uniform(0,1),
         np.random.uniform(0,1)])
-possible_a = np.linspace(0,1,5)
+possible_a = np.linspace(0,1,20)
 
 ## set qfunction as nn
 q_input_size = type_face + state_ir + type_action
@@ -161,7 +159,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
 
     print('action',(convert_action(action[:,episode])))
-    action_array = convert_action(action[:,episode])
+    action_array = convert_action(action[:,episode],ir_no)
     sma_act.send_para(convert_action(action[:,episode]))
 
     #save data of action
