@@ -6,9 +6,6 @@ if [ $# -ne 2 ]; then
 	exit 1
 fi
 
-echo $1
-echo $2
-
 if [ $1 = ir ]; then
 	echo "ir"
 	python serial_com/serial_read5.py /dev/ttyACM$2
