@@ -230,8 +230,9 @@ for i in range(1,num_top+1):
         numpy.savetxt(q_handle,
                 last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:]))),fmt="%d",delimiter=",")
         print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:])
-        print(np.argsort(reward)[i],stamp_reward[np.argsort(reward[1:num_episodes-1])[i]+1,1,:])
-        numpy.savetxt(q_handle,last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[i]+1,1,:]))),fmt="%d",delimiter=",")
+        print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,1,:])
+        numpy.savetxt(q_handle,
+                last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,1,:]))),fmt="%d",delimiter=",")
 
 #reward[n]の値が最も高いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
 #reward[n]の値が最も低いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
