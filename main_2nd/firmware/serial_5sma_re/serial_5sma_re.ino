@@ -55,7 +55,6 @@ int pin_no[5]={SMA_PIN_1,SMA_PIN_2,SMA_PIN_3,SMA_PIN_4,SMA_PIN_5};
 void act_sma(int pin_no, int deg){
     Serial.println(pin_no);
     analogWrite(pin_no, map(deg, 0, 100, 0, 255));
-    //delay(TIME_ON*1000);
 }
 
 void stop_sma(int pin_no){
@@ -80,7 +79,6 @@ void send_all(int pwm_input,int keep,int delay_time){
 		delay_time*3*95,
 		delay_time*4*95};
 
-	//act_sma(SMA_PIN_1,pwm_input);
 	unsigned long now_time;
   int dt;
 
@@ -130,11 +128,6 @@ void loop() {
       k=0;
       exit;
     }
-//    if(k_time-n_time>30000){
-//      Serial.println("k");
-//      k=0;
-//      exit;
-//    }
     //Serial.println(Serial.read());
     if(k>2){
       //*************
