@@ -81,7 +81,6 @@ void loop() {
 	  ir_val[j] = ir_val[j]/100.0;
 	  distance[j] = 6762/(ir_val[j]-9)-4;
 
-    Serial.println(distance[2]);
     brink(j,distance[j]);
   }
 
