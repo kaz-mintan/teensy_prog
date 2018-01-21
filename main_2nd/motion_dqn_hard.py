@@ -67,6 +67,7 @@ tmp_time= np.zeros((num_timestamp,1))
 state_mean = np.zeros((type_face+state_ir,num_episodes))
 state_reward = np.zeros((type_face+type_ir,1))
 time_reward = np.zeros((num_timestamp,1))
+time_reward_delay = np.zeros((num_timestamp,1))
 state_reward_delay = np.zeros((type_face+type_ir,1))
 stamp_reward = np.zeros((num_episodes-1,2,num_timestamp+1))
 
@@ -112,7 +113,9 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     ##########################################################################
     state = np.zeros((type_face+type_ir,1))
     state_reward = np.zeros((type_face+type_ir,1))
+    state_reward_delay = np.zeros((type_face+type_ir,1))
     time_reward = np.zeros((num_timestamp,1))
+    time_reward_delay = np.zeros((num_timestamp,1))
 
 
     wait = True
@@ -172,6 +175,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     reaction_delay_time = 0.5 #TODO at this point
     action_end_time = 3*4+action_array[1]#sec
     action_time = 3*5+action_array[1]*2 + 7#sec
+
     while reward_wait:
         now_time = datetime.now()
         delta_time = now_time - start_time
@@ -184,13 +188,14 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         with open('test_reward_face.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%.3f",delimiter=",")
 
-        print('face as reward',tmp_time[:,0])
         state_reward=np.hstack((state_reward,tmp_state))
         time_reward=np.hstack((time_reward,tmp_time))
 
         if delta_time.total_seconds() > reaction_delay_time\
                 and delta_time.total_seconds() < action_end_time:
             state_reward_delay=np.hstack((state_reward_delay,tmp_state))
+            time_reward_delay=np.hstack((time_reward_delay,tmp_time))
+            print('t',rewhile_t,'time',tmp_time[:,0],'state',tmp_state[:,0])
 
             with open('reward_extracted.csv', 'a') as rewext_handle:
                 numpy.savetxt(rewext_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
@@ -204,7 +209,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             rewhile_t+= 1
 
     #一番Happyの高いタイムスタンプと低いタイムスタンプ, and number of frameを保存
-    stamp_reward = save_stamp(stamp_reward, time_reward, state_reward_delay, episode)
+    stamp_reward = save_stamp(stamp_reward, time_reward_delay, state_reward_delay, episode)
     print('stamp_reward',stamp_reward)
 
     ### calcurate r_{t}
