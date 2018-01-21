@@ -3,7 +3,7 @@
 
 #define IR_PIN_1 A0
 #define IR_PIN_2 A1
-#define IR_PIN_3 A4
+#define IR_PIN_3 A20
 #define IR_PIN_4 A5
 #define IR_PIN_5 A3
 
@@ -50,7 +50,7 @@ void brink(int no, int distance_input){
 
   if(distance_input<80 && distance_input>0){
     if(no==2){
-      analogWrite(pin_led[no], map(-distance_input+10, 0, 100, 0, 255));
+      analogWrite(pin_led[no], map(-distance_input+15, 0, 100, 0, 255));
     }else{
       analogWrite(pin_led[no], map(-distance_input+15, 0, 100, 0, 255));
     }
@@ -67,6 +67,10 @@ int distance[5] = {0};
 
 // メインループ
 void loop() {
+  //Serial.println(analogRead(pin_no[2]));
+//}
+
+//void test(){
   ir_val[5] = {0};
   for (i=0 ; i < 100 ; i++) {
 	  for (j =0;j<5;j++){
@@ -76,8 +80,8 @@ void loop() {
   for (j=0;j<5;j++){
 	  ir_val[j] = ir_val[j]/100.0;
 	  distance[j] = 6762/(ir_val[j]-9)-4;
-//Serial.println("distance");
-Serial.println(distance[4]);
+
+    Serial.println(distance[2]);
     brink(j,distance[j]);
   }
 
