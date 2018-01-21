@@ -95,7 +95,8 @@ void send_all(int pwm_input,int keep,int delay_time){
   				act_sma(pin_no[i],pwm_input);
           move_array[i]=1;
   			}
-  		}else if(move_array[i]==1){
+		}
+  		if(move_array[i]==1){
          now_time = millis();
          dt = now_time - start_time;
   			if(dt>=stop_array[i]){
@@ -104,7 +105,6 @@ void send_all(int pwm_input,int keep,int delay_time){
   			}
   		}
   	}
-   
   }
 }
 
