@@ -3,7 +3,7 @@
 
 #define IR_PIN_1 A0
 #define IR_PIN_2 A1
-#define IR_PIN_3 A17
+#define IR_PIN_3 A4
 #define IR_PIN_4 A5
 #define IR_PIN_5 A3
 
@@ -11,7 +11,7 @@
 #define LED_PIN_2 10
 #define LED_PIN_3 22
 #define LED_PIN_4 23
-#define LED_PIN_5 32
+#define LED_PIN_5 5
 
 
 void setup() {
