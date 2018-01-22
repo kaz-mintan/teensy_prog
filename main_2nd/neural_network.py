@@ -3,6 +3,8 @@ import math
 import random
 import matplotlib.pyplot as plt
 import itertools
+from test_save_txt import *
+from datetime import datetime
 
 #from matplotlib import pyplot
 type_face = 5
@@ -64,6 +66,14 @@ class Neural:
 
             self.error[epo] = self.__calc_error(X, T)
 
+        with open('error_log.csv', 'a') as err_handle:
+            numpy.savetxt(err_handle,tmp_log(self.error,datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
+        with open('output_weight_log.csv', 'a') as out_handle:
+            numpy.savetxt(out_handle,self.output_weight,fmt="%.5f",delimiter=",",newline="\n")
+        with open('hidden_weight.csv', 'a') as hdn_handle:
+            numpy.savetxt(hdn_handle,self.hidden_weight,fmt="%.5f",delimiter=",",newline="\n")
+
+
     def predict(self, X):
         N = X.shape[0]
         C = numpy.zeros(N).astype('int')
@@ -113,7 +123,12 @@ class Neural:
                 p_array[:,0]=numpy.hstack((state_mean[:,episode+1],ret_action))
                 C, next_q=self.predict(p_array.T)
 
+        filename ='{0}{1}{2}'.format('q_possible/q_possible_',episode,'.npy')
+        with open(filename, 'a') as qa_handle:
+            numpy.save(qa_handle,possible_q)
+
         return ret_random, ret_action, next_q
+
 
     def update(self, state_mean, action, episode, q_teacher, reward, next_q):
             #reward, next_q, gamma, alpha):
@@ -180,7 +195,6 @@ class Neural:
         _hidden_weight = self.hidden_weight
         self.hidden_weight -= epsilon * hidden_delta.reshape((-1, 1)) * numpy.r_[numpy.array([1]), x]
         self.hidden_momentum = self.hidden_weight - _hidden_weight
-
 
     def __calc_error(self, X, T):
         N = X.shape[0]
