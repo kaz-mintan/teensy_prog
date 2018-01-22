@@ -179,7 +179,7 @@ void loop() {
       delay_time = vals[2];
       array_num = vals[3]-1;
       send_all(pwm_input,keep,delay_time,order_array[array_num]);
-      delay((keep+delay_time)*100);
+      delay(5000);
       //*************
       int vals[3];
       k=0;

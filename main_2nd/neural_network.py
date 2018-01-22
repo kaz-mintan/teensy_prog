@@ -127,6 +127,17 @@ class Neural:
         with open(filename, 'a') as qa_handle:
             numpy.save(qa_handle,possible_q)
 
+        print('ret_action',ret_action[1])
+        with open('q_possible/q_possible_a.csv', 'a') as qa_handle:
+            numpy.savetxt(qa_handle,tmp_log(numpy.hstack((np.array([episode]),possible_q[:,int(ret_action[1]*val),int(ret_action[2]*val)])),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
+        with open('q_possible/q_possible_b.csv', 'a') as qb_handle:
+            numpy.savetxt(qb_handle,tmp_log(numpy.hstack((np.array([episode]),possible_q[int(ret_action[0]*val),:,int(ret_action[2]*val)])),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
+        with open('q_possible/q_possible_c.csv', 'a') as qc_handle:
+            numpy.savetxt(qc_handle,tmp_log(numpy.hstack((np.array([episode]),possible_q[int(ret_action[0]*val),int(ret_action[1]*val),:])),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
+
+        with open('action_row.csv', 'a') as act_handle:
+            numpy.savetxt(act_handle,tmp_log(numpy.hstack((np.array([episode]),ret_action)),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
+
         return ret_random, ret_action, next_q
 
 

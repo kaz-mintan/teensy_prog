@@ -30,9 +30,8 @@ from test_save_txt import *
 from module import *
 from sequence import *
 
-t_window = 10  #number of time window
 num_episodes = 20  #number of all trials
-num_top = 2
+num_top = 5
 
 num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
@@ -96,9 +95,6 @@ Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch, 
 get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
 sma_act = send_4para.Act_sma(ser_port_sma,ser_baud)
 
-#for save files
-#save_files = Save_csv(datetime.now())
-
 start_time = 100
 wait_cycle = 5
 
@@ -117,13 +113,11 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     time_reward = np.zeros((num_timestamp,1))
     time_reward_delay = np.zeros((num_timestamp,1))
 
-
     wait = True
     thre = 10
 
     start_time_state = datetime.now()
     random_action_time = 5#second
-
 
     while_t = 1
     while wait:
@@ -174,7 +168,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     start_time = datetime.now()
     reaction_delay_time = 0 #TODO at this point
     action_end_time = 3*4+action_array[1]#sec
-    action_time = 3*5+action_array[1]*2 + 5#sec
+    #action_time = 3*5+action_array[1]*2 + 5#sec
+    action_time = 20#sec
 
     while reward_wait:
         now_time = datetime.now()
@@ -220,7 +215,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     q_teacher = Q_func.update(state_mean,action,episode-1,q_teacher,reward,next_q)
 
     state_before = state
-    time.sleep(5)
+    time.sleep(1)
 
 #output reward top and bottom 5 timestamps
 print(stamp_reward)
@@ -238,13 +233,6 @@ for i in range(1,num_top+1):
         print(np.hstack((np.array([index_l,reward[index_l]]),stamp_reward[index_l,1,:])))
         np.savetxt(q_handle,
                 last_log(np.hstack((np.array([index_l,reward[index_l]]),stamp_reward[index_l,1,:]))),fmt="%d",delimiter=",")
-
-        #numpy.savetxt(q_handle, last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1],reverse=False)[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1],reverse=False)[-i]+1,0,:]))),fmt="%d",delimiter=",")
-        #print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:])
-        #print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,1,:])
-        #numpy.savetxt(q_handle, last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1],reverse=True)[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1],reverse=True)[-i]+1,1,:]))),fmt="%d",delimiter=",")
-
-#
 
 #reward[n]の値が最も高いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
 #reward[n]の値が最も低いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
