@@ -31,7 +31,7 @@ from module import *
 from sequence import *
 
 t_window = 10  #number of time window
-num_episodes = 5  #number of all trials
+num_episodes = 20  #number of all trials
 num_top = 2
 
 num_timestamp = 4#hour, minute, second and millisecond
@@ -172,9 +172,9 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     reward_wait= True
     rewhile_t = 1
     start_time = datetime.now()
-    reaction_delay_time = 0.5 #TODO at this point
+    reaction_delay_time = 0 #TODO at this point
     action_end_time = 3*4+action_array[1]#sec
-    action_time = 3*5+action_array[1]*2 + 7#sec
+    action_time = 3*5+action_array[1]*2 + 5#sec
 
     while reward_wait:
         now_time = datetime.now()
@@ -226,13 +226,25 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 print(stamp_reward)
 print('reward',reward)
 for i in range(1,num_top+1):
+    index_h = np.argsort(reward[1:num_episodes-1])[-i]+1
+    index_l = np.argsort(reward[1:num_episodes-1])[::-1][-i]+1
+
     with open('question_picture.csv', 'a') as q_handle:
-        numpy.savetxt(q_handle,
-                last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:]))),fmt="%d",delimiter=",")
-        print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:])
-        print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,1,:])
-        numpy.savetxt(q_handle,
-                last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1])[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,1,:]))),fmt="%d",delimiter=",")
+
+        np.savetxt(q_handle,
+                last_log(np.hstack((np.array([index_h,reward[index_h]]),stamp_reward[index_h,0,:]))),fmt="%d",delimiter=",")
+
+        print(np.hstack((np.array([index_h,reward[index_h]]),stamp_reward[index_h,0,:])))
+        print(np.hstack((np.array([index_l,reward[index_l]]),stamp_reward[index_l,1,:])))
+        np.savetxt(q_handle,
+                last_log(np.hstack((np.array([index_l,reward[index_l]]),stamp_reward[index_l,1,:]))),fmt="%d",delimiter=",")
+
+        #numpy.savetxt(q_handle, last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1],reverse=False)[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1],reverse=False)[-i]+1,0,:]))),fmt="%d",delimiter=",")
+        #print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,0,:])
+        #print(np.argsort(reward)[-i],stamp_reward[np.argsort(reward[1:num_episodes-1])[-i]+1,1,:])
+        #numpy.savetxt(q_handle, last_log(np.hstack((np.array([episode,reward[np.argsort(reward[1:num_episodes-1],reverse=True)[-i]+1]]),stamp_reward[np.argsort(reward[1:num_episodes-1],reverse=True)[-i]+1,1,:]))),fmt="%d",delimiter=",")
+
+#
 
 #reward[n]の値が最も高いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
 #reward[n]の値が最も低いインデックスiを5つ見つけて、stamp_reward[i,0,:]をCSVに出力
