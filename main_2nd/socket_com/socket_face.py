@@ -23,19 +23,13 @@ class Get_face:
         for t in range(self.num_face+self.num_time):
             if face_tmp_list[t]:
                 if face_tmp_list[t].isdigit() == False:
-                #if face_tmp_list[t] == '':
-                #if isinstance(face_tmp_list[0],int) == False:
-                    #print('face_list',face_tmp_list)
-                    #print('break')
                     ret = 0
                     return ret
                 else:
                     ret = 1
         if ret == 1:
-        #if isinstance(face_tmp_list[0],int) == True:
             face_int = map(int,face_tmp_list[0:self.num_face+self.num_time])
             for i in range(self.num_face+self.num_time):
-                #print('face_tmp_list',face_tmp_list[i])
                 if face_int[i]<100 and face_int[i]>=0:
                     ret = 1
                 else:
@@ -45,10 +39,8 @@ class Get_face:
 
     def check_time(self,face_tmp_list):
         ret = 0
-        #if isinstance(face_tmp_list[0],int) == True:
         time_int = map(int,face_tmp_list[self.num_face:self.num_face+self.num_time])
         for i in range(self.num_time):
-            #print('face_tmp_list',face_tmp_list[i])
             if time_int[0]==0 and time_int[4]==0:
                 ret = 0
                 break

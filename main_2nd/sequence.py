@@ -6,7 +6,7 @@ import math
 
 type_face = 5
 num_face = 5
-num_ir = 1
+num_ir = 5
 
 # reward function
 def calc_reward(state, state_predict, state_before, time_window, mode):
@@ -45,15 +45,30 @@ def calc_reward(state, state_predict, state_before, time_window, mode):
 
     return reward
 
-def seq2feature(state):
-    state_feature = np.mean(state, axis=1)
+def seq2feature(state_mean, state, ir_no,type_face):
+    state = state/100.0
+    state_feature = np.zeros_like(state_mean)
+    state_feature[:type_face] = np.max(state[:type_face],axis=1)*np.mean(state[:type_face], axis=1)
+
+    state_feature[-2]=ir_no
+    state_feature[-1]=np.random.uniform(0,1)
     return state_feature
 
 if __name__ == "__main__" :
-    argvs = sys.argv  # コマンドライン引数を格納したリストの取得
-    time_window = 3
-    mode = argvs[1]
-    state = np.random.uniform(low=0,high=1,size=(num_face+num_ir,time_window))
+    type_face = 5
+    type_ir = 5
+    state_ir = 2
+    state = np.zeros((type_face+type_ir,5))
+    state_ran = np.random.randint(low=0,high=100,size=state.shape)
+    print('state_ran',state_ran)
+
+    state_mean = np.zeros((type_face+state_ir,1))
+    state_mean = seq2feature(state_mean[:,0],state_ran,1,type_face)
+    print('state_mean',state_mean)
+
+    #argvs = sys.argv  # コマンドライン引数を格納したリストの取得
+    #time_window = 3
+    #mode = argvs[1]
     state_predict = np.random.uniform(low=0,high=1,size=(num_face+num_ir,time_window))
     #print('state_predict',state_predict)
 

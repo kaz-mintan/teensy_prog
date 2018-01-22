@@ -3,15 +3,15 @@
 
 #define IR_PIN_1 A0
 #define IR_PIN_2 A1
-#define IR_PIN_3 A17
-#define IR_PIN_4 A13
+#define IR_PIN_3 A20
+#define IR_PIN_4 A5
 #define IR_PIN_5 A3
 
 #define LED_PIN_1 9
 #define LED_PIN_2 10
 #define LED_PIN_3 22
 #define LED_PIN_4 23
-#define LED_PIN_5 25
+#define LED_PIN_5 5
 
 
 void setup() {
@@ -47,16 +47,12 @@ int pin_led[5]={LED_PIN_1,LED_PIN_2,LED_PIN_3,LED_PIN_4,LED_PIN_5};
 
 int thre = 5;
 void brink(int no, int distance_input){
-  if(no==3){
-    //analogWrite(pin_led[no], map(-distance_input+500, 0, 100, 0, 255));
-  }
+
   if(distance_input<80 && distance_input>0){
-    if(no==4){
-      analogWrite(pin_led[no], map(-distance_input+10, 0, 100, 0, 255));
-    }else if(no==2){
-      analogWrite(pin_led[no], map(-distance_input+30, 0, 100, 0, 255));
+    if(no==2){
+      analogWrite(pin_led[no], map(-distance_input+15, 0, 100, 0, 255));
     }else{
-      analogWrite(pin_led[no], map(-distance_input+30, 0, 100, 0, 255));
+      analogWrite(pin_led[no], map(-distance_input+15, 0, 100, 0, 255));
     }
   }
 }
@@ -71,6 +67,10 @@ int distance[5] = {0};
 
 // メインループ
 void loop() {
+  //Serial.println(analogRead(pin_no[2]));
+//}
+
+//void test(){
   ir_val[5] = {0};
   for (i=0 ; i < 100 ; i++) {
 	  for (j =0;j<5;j++){
@@ -80,8 +80,7 @@ void loop() {
   for (j=0;j<5;j++){
 	  ir_val[j] = ir_val[j]/100.0;
 	  distance[j] = 6762/(ir_val[j]-9)-4;
-Serial.println("distance");
-Serial.println(distance[3]);
+
     brink(j,distance[j]);
   }
 
