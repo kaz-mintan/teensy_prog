@@ -35,7 +35,7 @@ int serialNumVal() {
     input[i] = Serial.read();
     // 文字数が3以上 or 末尾文字がある場合の処理
     if (i > 2 || input[i] == '\0') {
-       //Serial.println(input);
+       Serial.println(input);
       val = atoi(input);    // 文字列を数値に変換
       i = 0;      // カウンタの初期化
       return val;
