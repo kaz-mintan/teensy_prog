@@ -26,7 +26,7 @@ def devide_3(analog_num):
     return num
 
 def convert_action(action,ir_no):
-    pwm_input = 50*action[0]+35
+    pwm_input = int(50*action[0])+35
     #keep = 1.0*action[1]+1.0
     delay = 1.4*action[1] + 0.1
     symmetry = devide_3(action[2])
