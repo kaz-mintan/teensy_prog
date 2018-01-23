@@ -34,7 +34,5 @@ python motion_dqn_hard.py $mode /dev/ttyACM$sma_port /dev/ttyACM$ir_port
 mv $f1 $f2 $f3 $f4 $f5 $f6 $f7 $f9 $f10 $f11 $dir
 mv $dir_2 $dir
 
-scp -rp $dir $server
-
 #python motion_dqn_hard.py heuristic /dev/ttyACM0 /dev/ttyACM1
 #csv files
