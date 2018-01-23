@@ -30,8 +30,8 @@ from test_save_txt import *
 from module import *
 from sequence import *
 
-num_episodes = 20  #number of all trials
-num_top = 5
+num_episodes = 22  #number of all trials
+num_top = 2
 
 num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
@@ -126,7 +126,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
         tmp_state[:,0] = extract_state(get_val.ret_state())#changed to extract
 
-        print('fase/ir as state',tmp_state[:,0])
+        #print('fase/ir as state',tmp_state[:,0])
         with open('test_state.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,
                     tmp_log(np.hstack((np.array([episode]),
@@ -169,7 +169,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     reaction_delay_time = 0 #TODO at this point
     action_end_time = 3*4+action_array[1]#sec
     #action_time = 3*5+action_array[1]*2 + 5#sec
-    action_time = 20#sec
+    action_time = 19#sec
 
     while reward_wait:
         now_time = datetime.now()
@@ -190,7 +190,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
                 and delta_time.total_seconds() < action_end_time:
             state_reward_delay=np.hstack((state_reward_delay,tmp_state))
             time_reward_delay=np.hstack((time_reward_delay,tmp_time))
-            print('t',rewhile_t,'time',tmp_time[:,0],'state',tmp_state[:,0])
+            #print('t',rewhile_t,'time',tmp_time[:,0],'state',tmp_state[:,0])
 
             with open('reward_extracted.csv', 'a') as rewext_handle:
                 numpy.savetxt(rewext_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
