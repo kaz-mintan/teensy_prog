@@ -127,7 +127,6 @@ class Neural:
         with open(filename, 'a') as qa_handle:
             numpy.save(qa_handle,possible_q)
 
-        print('ret_action',ret_action[1])
         with open('q_possible/q_possible_a.csv', 'a') as qa_handle:
             numpy.savetxt(qa_handle,tmp_log(numpy.hstack((np.array([episode]),possible_q[:,int(ret_action[1]*val),int(ret_action[2]*val)])),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
         with open('q_possible/q_possible_b.csv', 'a') as qb_handle:

@@ -30,8 +30,8 @@ from test_save_txt import *
 from module import *
 from sequence import *
 
-num_episodes = 20  #number of all trials
-num_top = 5
+num_episodes = 12  #number of all trials
+num_top = 2
 
 num_timestamp = 4#hour, minute, second and millisecond
 type_face = 5
@@ -62,12 +62,17 @@ print('port_ir',ser_port_ir)
 state = np.zeros((type_face+type_ir,1))
 tmp_state = np.zeros((type_face+type_ir,1))
 tmp_time= np.zeros((num_timestamp,1))
+dt_array=np.zeros((1,1))
+tmp_dt=np.zeros((1,1))
 
 state_mean = np.zeros((type_face+state_ir,num_episodes))
 state_reward = np.zeros((type_face+type_ir,1))
 time_reward = np.zeros((num_timestamp,1))
+
 time_reward_delay = np.zeros((num_timestamp,1))
+dt_array_delay = np.zeros((1,1))
 state_reward_delay = np.zeros((type_face+type_ir,1))
+
 stamp_reward = np.zeros((num_episodes-1,2,num_timestamp+1))
 
 state_before = np.zeros_like(state) #for delta mode
@@ -95,7 +100,7 @@ Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch, 
 get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
 sma_act = send_4para.Act_sma(ser_port_sma,ser_baud)
 
-start_time = 100
+start_time = 50
 wait_cycle = 5
 
 #start to output sensor data
@@ -112,6 +117,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state_reward_delay = np.zeros((type_face+type_ir,1))
     time_reward = np.zeros((num_timestamp,1))
     time_reward_delay = np.zeros((num_timestamp,1))
+    dt_array_delay = np.zeros((1,1))
 
     wait = True
     thre = 10
@@ -126,7 +132,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
         tmp_state[:,0] = extract_state(get_val.ret_state())#changed to extract
 
-        print('fase/ir as state',tmp_state[:,0])
+        #print('fase/ir as state',tmp_state[:,0])
         with open('test_state.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,
                     tmp_log(np.hstack((np.array([episode]),
@@ -167,9 +173,10 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     rewhile_t = 1
     start_time = datetime.now()
     reaction_delay_time = 0 #TODO at this point
-    action_end_time = 3*4+action_array[1]#sec
+    action_end_time = 3*4+1#sec
     #action_time = 3*5+action_array[1]*2 + 5#sec
-    action_time = 20#sec
+    action_time = 19#sec
+    start_dt = time.time()
 
     while reward_wait:
         now_time = datetime.now()
@@ -179,18 +186,21 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         #########
 
         tmp_state[:,0], tmp_time[:,0]  = dev_state_time(get_val.ret_state())
+        tmp_dt[0,0] = time.time()-start_dt
         #save data to calculate reward all
         with open('test_reward_face.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%.3f",delimiter=",")
 
         state_reward=np.hstack((state_reward,tmp_state))
         time_reward=np.hstack((time_reward,tmp_time))
+        dt_array=np.hstack((dt_array,tmp_dt))
 
         if delta_time.total_seconds() > reaction_delay_time\
                 and delta_time.total_seconds() < action_end_time:
             state_reward_delay=np.hstack((state_reward_delay,tmp_state))
             time_reward_delay=np.hstack((time_reward_delay,tmp_time))
-            print('t',rewhile_t,'time',tmp_time[:,0],'state',tmp_state[:,0])
+            dt_array_delay=np.hstack((dt_array_delay,tmp_dt))
+            #print('t',rewhile_t,'time',tmp_time[:,0],'state',tmp_state[:,0])
 
             with open('reward_extracted.csv', 'a') as rewext_handle:
                 numpy.savetxt(rewext_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
@@ -205,10 +215,11 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     #一番Happyの高いタイムスタンプと低いタイムスタンプ, and number of frameを保存
     stamp_reward = save_stamp(stamp_reward, time_reward_delay, state_reward_delay, episode)
-    print('stamp_reward',stamp_reward)
+    #print('stamp_reward',stamp_reward)
 
     ### calcurate r_{t}
-    reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode)
+    print('debug, dt_array',dt_array)
+    reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode, dt_array_delay)
     with open('test_reward.csv', 'a') as reward_handle:
         numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1])),datetime.now()),fmt="%.3f",delimiter=",")
 
