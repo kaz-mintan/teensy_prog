@@ -10,9 +10,11 @@ type_ir = 5
 
 def f(face,t_array):
     face_next = face[:,1:] #for delta mode
-    t_next = t_array[:,1:]
+    print('t_next',t_array.shape,t_array)
+    t_next = t_array[1:]
+    print('t_next',t_next)
     do = face_next-face[:,:face.shape[1]-1]
-    dt = t_next-t_array[:,:face.shape[1]-1]
+    dt = t_next-t_array[:face.shape[1]-1]
     dt_tile = np.tile(dt,(face.shape[0],1))
     do_sum = np.sum(do/dt,axis=1)
 
