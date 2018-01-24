@@ -31,8 +31,8 @@ def reward_function(state, state_predict, state_before, mode, t_array):
     t = t_array[0,:]
 
     # coefficient
-    c_f = 10*np.array([0,70.0,0.0,-20.0,-20.0]) #for delta mode
-    c_g = np.array([0,70.0,0.0,-20.0,-20.0]) #for delta mode
+    c_f = np.array([0,0.90,0.0,-0.30,-0.30]) #for delta mode
+    c_g = np.array([0,9.0,0.0,-3.0,-3.0]) #for delta mode
     h = np.array([0,70.0,70.0,-70.0,-70.0]) #for heuristic mode
 
     T_duration = float(face.shape[1])

@@ -120,7 +120,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     dt_array_delay = np.zeros((1,1))
 
     wait = True
-    thre = 10
+    thre = 0.01*10
 
     start_time_state = datetime.now()
     random_action_time = 5#second
@@ -173,7 +173,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     rewhile_t = 1
     start_time = datetime.now()
     reaction_delay_time = 0 #TODO at this point
-    action_end_time = 3*4+1#sec
+    action_end_time = 3*4+2#sec
     #action_time = 3*5+action_array[1]*2 + 5#sec
     action_time = 19#sec
     start_dt = time.time()
