@@ -117,6 +117,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state_reward_delay = np.zeros((type_face+type_ir,1))
     time_reward = np.zeros((num_timestamp,1))
     time_reward_delay = np.zeros((num_timestamp,1))
+    dt_array_delay = np.zeros((1,1))
 
     wait = True
     thre = 10
@@ -214,9 +215,10 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     #一番Happyの高いタイムスタンプと低いタイムスタンプ, and number of frameを保存
     stamp_reward = save_stamp(stamp_reward, time_reward_delay, state_reward_delay, episode)
-    print('stamp_reward',stamp_reward)
+    #print('stamp_reward',stamp_reward)
 
     ### calcurate r_{t}
+    print('debug, dt_array',dt_array)
     reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode, dt_array_delay)
     with open('test_reward.csv', 'a') as reward_handle:
         numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1])),datetime.now()),fmt="%.3f",delimiter=",")
