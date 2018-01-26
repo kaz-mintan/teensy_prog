@@ -10,9 +10,7 @@ type_ir = 5
 
 def f(face,t_array):
     face_next = face[:,1:] #for delta mode
-    print('t_next',t_array.shape,t_array)
     t_next = t_array[1:]
-    print('t_next',t_next)
     do = face_next-face[:,:face.shape[1]-1]
     dt = t_next-t_array[:face.shape[1]-1]
     dt_tile = np.tile(dt,(face.shape[0],1))
@@ -31,7 +29,7 @@ def reward_function(state, state_predict, state_before, mode, t_array):
     t = t_array[0,:]
 
     # coefficient
-    c_f = np.array([0,0.90,0.0,-0.30,-0.30]) #for delta mode
+    c_f = np.array([0,3.0,0.0,-1.0,-1.0]) #for delta mode
     c_g = np.array([0,9.0,0.0,-3.0,-3.0]) #for delta mode
     h = np.array([0,70.0,70.0,-70.0,-70.0]) #for heuristic mode
 
