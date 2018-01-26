@@ -120,7 +120,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     dt_array_delay = np.zeros((1,1))
 
     wait = True
-    thre = 10
+    thre = 0.01*10
 
     start_time_state = datetime.now()
     random_action_time = 5#second
@@ -132,7 +132,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
         tmp_state[:,0] = extract_state(get_val.ret_state())#changed to extract
 
-        #print('fase/ir as state',tmp_state[:,0])
+        print('fase/ir as state',tmp_state[:,0])
         with open('test_state.csv', 'a') as rf_handle:
             numpy.savetxt(rf_handle,
                     tmp_log(np.hstack((np.array([episode]),
@@ -173,7 +173,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     rewhile_t = 1
     start_time = datetime.now()
     reaction_delay_time = 0 #TODO at this point
-    action_end_time = 3*4+1#sec
+    action_end_time = 3*4+2#sec
     #action_time = 3*5+action_array[1]*2 + 5#sec
     action_time = 19#sec
     start_dt = time.time()
@@ -200,7 +200,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             state_reward_delay=np.hstack((state_reward_delay,tmp_state))
             time_reward_delay=np.hstack((time_reward_delay,tmp_time))
             dt_array_delay=np.hstack((dt_array_delay,tmp_dt))
-            #print('t',rewhile_t,'time',tmp_time[:,0],'state',tmp_state[:,0])
+            print('t',rewhile_t,'time',tmp_time[:,0],'state',tmp_state[:,0])
 
             with open('reward_extracted.csv', 'a') as rewext_handle:
                 numpy.savetxt(rewext_handle,tmp_log(np.hstack((np.array([episode]),np.array([rewhile_t]),tmp_state[:,0])),datetime.now()),fmt="%f",delimiter=",")
@@ -218,7 +218,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     #print('stamp_reward',stamp_reward)
 
     ### calcurate r_{t}
-    print('debug, dt_array',dt_array)
     reward[episode+1] = reward_function(state_reward_delay, state_predict, state_before, mode, dt_array_delay)
     with open('test_reward.csv', 'a') as reward_handle:
         numpy.savetxt(reward_handle,tmp_log(np.hstack((np.array([episode+1]),reward[episode+1])),datetime.now()),fmt="%.3f",delimiter=",")
@@ -229,7 +228,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     time.sleep(1)
 
 #output reward top and bottom 5 timestamps
-print(stamp_reward)
+#print(stamp_reward)
 print('reward',reward)
 for i in range(1,num_top+1):
     index_h = np.argsort(reward[1:num_episodes-1])[-i]+1

@@ -25,7 +25,7 @@ def extract_state(state_array):
     type_ir = 5
     num_timestamp = 4
 
-    return np.hstack((state_array[:type_face],state_array[type_face+num_timestamp:]))
+    return np.hstack((0.01*state_array[:type_face],0.01*state_array[type_face+num_timestamp:]))
 
 def extract_time(state_array):
     type_face = 5
