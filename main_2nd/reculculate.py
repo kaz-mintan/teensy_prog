@@ -8,20 +8,8 @@ import sys
 from neural_network import *
 from serial_pc import *
 
-#from get_face_ir import *
-#from serial_com import serial_sma
-#from serial_com import send_4para
-
 import time
 from datetime import datetime
-
-#for test
-#from dummy_modules import dummy_evaluator
-#from dummy_modules import hand_motion
-#from test_linear import *
-
-#from save_files import *
-#from datetime import datetime
 
 from action_convert import *
 from reward_calc import *
@@ -38,6 +26,7 @@ type_face = 5
 type_ir = 5 #5 ir sensors
 type_action =3 #3(pwm,delay,num of array)
 state_ir = 2 #number of argument of state(ir sensor)
+#TODO change
 
 gamma = 0.9
 alpha = 0.5
@@ -46,17 +35,14 @@ epsilon = 0.1
 mu = 0.9
 epoch = 1000
 
-soc_host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
-soc_port = 50000 #クライアントと同じPORTをしてあげます
-ser_baud = 19200
+#soc_host = "192.168.146.128" #お使いのサーバーのホスト名を入れます
+#soc_port = 50000 #クライアントと同じPORTをしてあげます
+#ser_baud = 19200
 
 #5 [4] start main function. set parameters
 argvs = sys.argv
 mode = argvs[1]
-ser_port_sma = argvs[2]
-ser_port_ir = argvs[3]
-print('port_sma',ser_port_sma)
-print('port_ir',ser_port_ir)
+user_name = argvs[2]
 
 # [5] main tourine
 state = np.zeros((type_face+type_ir,1))
@@ -96,16 +82,8 @@ q_hidden_size = (q_input_size + q_output_size )/2
 q_teacher = np.zeros((q_output_size,num_episodes))
 Q_func = Neural(q_input_size, q_hidden_size, q_output_size, epsilon, mu, epoch, gamma, alpha)
 
-# setting of serial com
-get_val = Get_state(ser_port_ir,ser_baud,soc_host,soc_port)
-sma_act = send_4para.Act_sma(ser_port_sma,ser_baud)
-
 start_time = 50
 wait_cycle = 5
-
-#start to output sensor data
-for st in range(start_time):
-    print(get_val.ret_state())
 
 # main loop
 for episode in range(num_episodes-1):  #repeat for number of trials
@@ -152,8 +130,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
             while_t += 1
 
     # if the sensor is larger than the value of threshold, sma starts to move
-    state_mean[:,episode] = seq2feature(state_mean[:,episode], state, ir_no,type_face)#TODO
-    #TODO waiting
+    state_mean[:,episode] = seq2feature(state_mean[:,episode], state, ir_no,type_face)
+    #TODO change: read test_state.csv
 
     with open('test_state_mean.csv', 'a') as smean_handle:
         numpy.savetxt(smean_handle,tmp_log(np.hstack((np.array([episode]),state_mean[:,episode])),datetime.now()),fmt="%.3f",delimiter=",")
@@ -163,7 +141,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
 
     print('action',(convert_action(action[:,episode],ir_no)))
     action_array = convert_action(action[:,episode],ir_no)
-    sma_act.send_para(convert_action(action[:,episode],ir_no))
+    #sma_act.send_para(convert_action(action[:,episode],ir_no))
+    #TODO change: write test_action.csv(no change?)
 
     #save data of action
     with open('test_action_start.csv', 'a') as act_handle:
@@ -172,7 +151,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     reward_wait= True
     rewhile_t = 1
     start_time = datetime.now()
-    reaction_delay_time = 0 #TODO at this point
+    reaction_delay_time = 0
     action_end_time = 3*4+2#sec
     #action_time = 3*5+action_array[1]*2 + 5#sec
     action_time = 19#sec
@@ -185,6 +164,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
         # get face
         #########
 
+        #TODO change: read test_reward_face.csv
         tmp_state[:,0], tmp_time[:,0]  = dev_state_time(get_val.ret_state())
         tmp_dt[0,0] = time.time()-start_dt
         #save data to calculate reward all
