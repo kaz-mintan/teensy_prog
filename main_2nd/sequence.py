@@ -46,12 +46,12 @@ def calc_reward(state, state_predict, state_before, time_window, mode):
     return reward
 
 def seq2feature(state_mean, state, ir_no,type_face):
-    state = state/100.0
+    state = state
     state_feature = np.zeros_like(state_mean)
     state_feature[:type_face] = np.max(state[:type_face],axis=1)*np.mean(state[:type_face], axis=1)
 
-    state_feature[-2]=ir_no
-    state_feature[-1]=np.random.uniform(0,1)
+    state_feature[-1]=ir_no/4.0
+    #state_feature[-1]=np.random.uniform(0,1)
     return state_feature
 
 if __name__ == "__main__" :
