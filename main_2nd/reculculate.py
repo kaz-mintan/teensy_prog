@@ -18,6 +18,16 @@ from test_save_txt import *
 from module import *
 from sequence import *
 
+argvs = sys.argv
+print len(argvs)
+if len(argvs)!=4:
+    print "(message): input name, mode and day"
+else:
+    name = argvs[1]
+    mode = argvs[2]
+    day = argvs[3]
+
+
 num_episodes = 12  #number of all trials
 num_top = 2
 
@@ -35,10 +45,6 @@ mu = 0.9
 epoch = 1000
 
 #5 [4] start main function. set parameters
-argvs = sys.argv
-name = argvs[1]
-mode = argvs[2]
-day = argvs[3]
 
 path_name = '/home/kumagai/data/waterloo/before/'
 dir_name = name + '/exp_201801' +day+'_' + mode + '_' + name +'/'
