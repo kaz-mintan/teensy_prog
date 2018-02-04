@@ -27,7 +27,6 @@ else:
     mode = argvs[2]
     day = argvs[3]
 
-
 num_episodes = 12  #number of all trials
 num_top = 2
 
@@ -54,6 +53,7 @@ state_file = 'test_state.csv'
 state_mean_file = 'test_state_mean.csv'
 reward_face_file = 'test_reward_face.csv'
 
+print(path+state_file)
 state_data = np.loadtxt(path+state_file,delimiter=",")
 print(path+state_mean_file)
 ir_no = np.loadtxt(path+state_mean_file,delimiter=",")
