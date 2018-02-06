@@ -12,6 +12,7 @@ def select_array_num(symm,ir_no):
     arg_base= int(ir_no)
     symmetry = int(symm)
 
+    print(arg_base,symmetry)
     return array[arg_base,symmetry]
 
 def devide_3(analog_num):

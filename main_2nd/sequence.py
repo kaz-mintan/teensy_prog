@@ -50,8 +50,7 @@ def seq2feature(state_mean, state, ir_no,type_face):
     state_feature = np.zeros_like(state_mean)
     state_feature[:type_face] = np.max(state[:type_face],axis=1)*np.mean(state[:type_face], axis=1)
 
-    state_feature[-1]=ir_no/4.0
-    #state_feature[-1]=np.random.uniform(0,1)
+    state_feature[-1]=(ir_no+1)/5.0
     return state_feature
 
 if __name__ == "__main__" :
