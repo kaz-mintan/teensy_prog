@@ -157,6 +157,7 @@ class Neural:
 
         q_array[:,0]=q2nn(q_teacher[:,episode])
 
+        print(p_array.T,q_array)
         self.train(p_array.T,q_array)
 
         return q_teacher

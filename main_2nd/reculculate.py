@@ -90,20 +90,19 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     state_mean[:,episode] = seq2feature(state_mean[:,episode], state, ir_no,type_face)
     print('state_mean',state_mean[:,episode])
     print('action_actual',action_actual)
-    print('action_actual',action)
 
     ### calcurate a_{t} based on s_{t}
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
     ### check q_value of actually selected a_{t}
     p_array[:,0]=numpy.hstack((state_mean[:,episode+1],action_actual[episode]))
-    actual_q_val = Q_func.predict(p_array.T)
+    c,actual_q_val = Q_func.predict(p_array.T)
     print('actual_q_val',actual_q_val)
 
-    print('action',(convert_action(action[:,episode],ir_no)))
+    print('re_action',(convert_action(action[:,episode],ir_no)))
     action_array = convert_action(action[:,episode],ir_no)
 
     #save data of action
     with open('re_action.csv', 'a') as act_handle:
         numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],convert_action(action[:,episode],ir_no))),datetime.now()),fmt="%.3f",delimiter=",")
 
-    q_teacher = Q_func.update(state_mean,action_actual.T,episode-1,q_teacher,reward,next_q)
+    q_teacher = Q_func.update(state_mean,action_actual.T,episode-1,q_teacher,reward,actual_q_val)
