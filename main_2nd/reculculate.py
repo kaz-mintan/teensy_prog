@@ -58,7 +58,8 @@ mean_data = np.loadtxt(state_mean_file,delimiter=",")
 action_data = np.loadtxt(action_file,delimiter=",")
 
 action_actual=action_data[:,2:5]
-reward = reward_data[:,1]
+reward = np.insert(reward_data[:,1],0,0)
+print('reward',reward)
 random_rate = 0
 
 # [5] main tourine

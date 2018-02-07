@@ -15,6 +15,17 @@ def select_array_num(symm,ir_no):
     print(arg_base,symmetry)
     return array[arg_base,symmetry]
 
+def num2symmetry(num):
+    array=np.array([[2,0,0],
+        [6,8,5],
+        [11,14,12],
+        [17,20,18],
+        [0,0,22]])
+
+    print(np.where(array == num))
+    row, col = np.where(array == num)
+    return col
+
 def devide_3(analog_num):
     num = -1
     array=np.linspace(0,1,4)
@@ -35,7 +46,17 @@ def convert_action(action,ir_no):
     array_num = select_array_num(symmetry,base)
     return np.array([pwm_input,delay,array_num])
 
+def inv_convert_action(action):
+    pwm_row = (action[0]-35.0)/50.0
+    delay_row = (action[1]-0.1)/1.4
+    symmetry_row = num2symmetry(action[2])
+
+
+    return np.array([pwm_row, delay_row, symmetry_row])
+
 if __name__ == '__main__':
+    num = raw_input()
+    print('sym_row',num2symmetry(int(num)))
     type_action = 3
     action = np.zeros((type_action,1))
     action[0,0]=1
