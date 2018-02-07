@@ -22,7 +22,6 @@ def num2symmetry(num):
         [17,20,18],
         [0,0,22]])
 
-    print(np.where(array == num))
     row, col = np.where(array == num)
     return col
 
@@ -49,14 +48,13 @@ def convert_action(action,ir_no):
 def inv_convert_action(action):
     pwm_row = (action[0]-35.0)/50.0
     delay_row = (action[1]-0.1)/1.4
-    symmetry_row = num2symmetry(action[2])
-
+    symmetry_row = num2symmetry(action[2])/2.0
 
     return np.array([pwm_row, delay_row, symmetry_row])
 
 if __name__ == '__main__':
-    num = raw_input()
-    print('sym_row',num2symmetry(int(num)))
+    action_conv=np.array([35,0.7,8])
+    print('inv_conv',inv_convert_action(action_conv))
     type_action = 3
     action = np.zeros((type_action,1))
     action[0,0]=1
