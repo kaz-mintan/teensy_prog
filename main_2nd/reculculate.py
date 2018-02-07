@@ -90,7 +90,6 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     print('ir_no',ir_no)
     state_mean[:,episode] = seq2feature(state_mean[:,episode], state, ir_no,type_face)
     print('state_mean',state_mean[:,episode])
-    print('action_actual',action_actual)
 
     ### calcurate a_{t} based on s_{t}
     random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
