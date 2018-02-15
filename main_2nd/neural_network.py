@@ -73,7 +73,6 @@ class Neural:
         with open('hidden_weight.csv', 'a') as hdn_handle:
             numpy.savetxt(hdn_handle,self.hidden_weight,fmt="%.5f",delimiter=",",newline="\n")
 
-
     def predict(self, X):
         N = X.shape[0]
         C = numpy.zeros(N).astype('int')
@@ -139,9 +138,41 @@ class Neural:
 
         return ret_random, ret_action, next_q
 
+    def reculc_gen_action(self, possible_a, state_mean, episode,random_rate):
+        p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
+        #possible_q = numpy.zeros((100,100,100))
+        possible_q = numpy.zeros((possible_a.shape[0],
+            possible_a.shape[0],possible_a.shape[0]))
+
+        ret_random = 0
+        ret_action = numpy.array([0,0,0])
+        next_q = 0
+        small_q = 0
+        dim_num = 3
+        val = float(possible_a.shape[0])
+        if episode != 0:
+            for a,b,c in itertools.product(range(possible_a.shape[0]),repeat=dim_num):
+                array = numpy.hstack((possible_a[a],possible_a[b],possible_a[c]))
+
+                p_array[:,0]=numpy.hstack((state_mean[:,episode+1],array))
+                C, possible_q[a,b,c]=self.predict(p_array.T)
+
+            #if random_rate <= numpy.random.uniform(0, 1):
+            ret_random=1#maximize
+            action_a,action_b,action_c=argmax_ndim(possible_q)
+            #ret_action = numpy.array([action_a/100.0,action_b/100.0,action_c/100.0])
+            ret_action = numpy.array([action_a/val,action_b/val,action_c/val])
+
+            next_q=numpy.max(possible_q)
+            small_q=numpy.min(possible_q)
+
+        return ret_random, ret_action, next_q, small_q
+
+
+
 
     def update(self, state_mean, action, episode, q_teacher, reward, next_q):
-            #reward, next_q, gamma, alpha):
+        #reward, next_q, gamma, alpha):
 
         # set input_array to predict
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
@@ -154,10 +185,11 @@ class Neural:
         #if alpha*((reward[episode+1])+gamma*nn2q(next_q)-nn2q(present_q[0,0])) >0:
         q_teacher[:,episode] = nn2q(present_q[0,0]) + \
                 self.alpha*((reward[episode+1])+self.gamma*nn2q(next_q)-nn2q(present_q[0,0]))
+        print('nn/reward',reward[episode+1])
 
         q_array[:,0]=q2nn(q_teacher[:,episode])
 
-        print('teacher',p_array.T,q_array)
+        print('teacher',p_array.T,q_array[:,0])
         self.train(p_array.T,q_array)
 
         return q_teacher

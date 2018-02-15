@@ -58,9 +58,13 @@ mean_data = np.loadtxt(state_mean_file,delimiter=",")
 action_data = np.loadtxt(action_file,delimiter=",")
 
 action_actual=action_data[:,2:5]
+#action_actual=np.concatenate(([[0,0,11]],action_org),axis=0)
+print('action',action_actual)
+
 reward = np.insert(reward_data[:,1],0,0)
 print('reward',reward)
 random_rate = 0
+inv_action = inv_convert_action(action_actual)
 
 # [5] main tourine
 state_mean = np.zeros((type_face+state_ir,num_episodes))
@@ -71,7 +75,7 @@ random = np.zeros(num_episodes)
 action[:,0] = np.array([np.random.uniform(0,1),
         np.random.uniform(0,1),
         np.random.uniform(0,1)])
-possible_a = np.linspace(0,1,20)
+possible_a = np.linspace(0,1,30)
 
 ## set qfunction as nn
 q_input_size = type_face + state_ir + type_action
@@ -92,17 +96,21 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     print('state_mean',state_mean[:,episode])
 
     ### calcurate a_{t} based on s_{t}
-    random[episode], action[:,episode], next_q = Q_func.test_gen_action(possible_a, state_mean, episode, random_rate)
+    random[episode], action[:,episode], next_q, small_q = Q_func.reculc_gen_action(possible_a, state_mean, episode, random_rate)
+    diff_q = next_q - small_q
     ### check q_value of actually selected a_{t}
-    p_array[:,0]=numpy.hstack((state_mean[:,episode+1],action_actual[episode]))
+    print('inv_action',inv_action[:,episode])
+    p_array[:,0]=numpy.hstack((state_mean[:,episode+1],inv_action[:,episode]))
     c,actual_q_val = Q_func.predict(p_array.T)
-    print('actual_q_val',actual_q_val)
+    rate_q = (actual_q_val[0,0]-small_q)/diff_q
+    with open('q_check.csv', 'a') as q_handle:
+        numpy.savetxt(q_handle,tmp_log(np.hstack((np.array([episode]),np.array(next_q),np.array(small_q),np.array(actual_q_val[0,0]),np.array(diff_q),np.array(rate_q))),datetime.now()),fmt="%.5f",delimiter=",")
 
-    print('re_action',(convert_action(action[:,episode],ir_no)))
     action_array = convert_action(action[:,episode],ir_no)
 
     #save data of action
-    with open('re_action.csv', 'a') as act_handle:
-        numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],convert_action(action[:,episode],ir_no))),datetime.now()),fmt="%.3f",delimiter=",")
+    with open('re_action_check.csv', 'a') as act_handle:
+        numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],convert_action(action[:,episode],ir_no),action_actual[episode,:])),datetime.now()),fmt="%.3f",delimiter=",")
 
-    q_teacher = Q_func.update(state_mean,action_actual.T,episode-1,q_teacher,reward,actual_q_val)
+    q_teacher = Q_func.update(state_mean,inv_action,episode,q_teacher,reward,actual_q_val)
+    #q_teacher = Q_func.update(state_mean,inv_convert_action(action_actual),episode-1,q_teacher,reward,actual_q_val)
