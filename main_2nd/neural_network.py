@@ -136,6 +136,11 @@ class Neural:
         with open('action_row.csv', 'a') as act_handle:
             numpy.savetxt(act_handle,tmp_log(numpy.hstack((np.array([episode]),ret_action)),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
 
+        with open('p_array_gen.csv', 'a') as act_handle:
+            numpy.savetxt(act_handle,tmp_log(numpy.hstack((np.array([episode]),p_array.T)),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
+
+
+
         return ret_random, ret_action, next_q
 
     def reculc_gen_action(self, possible_a, state_mean, episode,random_rate):
@@ -166,14 +171,36 @@ class Neural:
             next_q=numpy.max(possible_q)
             small_q=numpy.min(possible_q)
 
+            with open('p_array_learn.csv', 'a') as act_handle:
+                numpy.savetxt(act_handle,tmp_log(p_array[0,:],datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
+
         return ret_random, ret_action, next_q, small_q
 
+    def reproduct_test(self, state_mean, action, q_teacher, noize_rate, episode_num):
+        print('q_teacher',q_teacher)
+        p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
+        q_array= numpy.zeros((self.output_size,1)) #to stock predicted argument
+        p_array[:,0]=numpy.hstack((state_mean[:,episode_num],action[:,episode_num]))
+        for i in range(7):
+            noize_array = p_array
+            val = p_array[i,0]
+            noize_array[i,0]+=0.01*val
 
+            C,predict_answer = self.predict(noize_array.T)
+            print(i,p_array.T,noize_array.T)
+            print("pre,ans",predict_answer, q2nn(q_teacher[:,episode_num]))
+            ans =q2nn(q_teacher[:,episode_num])
+            print('check_noize',noize_array[:,0])
+            print('check_p-array',p_array[:,0])
+            print('check_predict',predict_answer[:,0])
+            print('check_ans',ans)
+
+            with open('reproduct_test.csv', 'a') as act_reprod:
+                numpy.savetxt(act_reprod,tmp_log(numpy.hstack((noize_array[:,0],p_array[:,0],predict_answer[:,0],ans)),datetime.now()),fmt="%.5f",delimiter=",",newline="\n")
 
 
     def update(self, state_mean, action, episode, q_teacher, reward, next_q):
         #reward, next_q, gamma, alpha):
-
         # set input_array to predict
         p_array= numpy.zeros((self.input_size,1)) #to stock predicted argument
         q_array= numpy.zeros((self.output_size,1)) #to stock predicted argument
@@ -188,9 +215,6 @@ class Neural:
         print('nn/reward',reward[episode+1])
 
         q_array[:,0]=q2nn(q_teacher[:,episode])
-
-        print('teacher',p_array.T,q_array[:,0])
-        self.train(p_array.T,q_array)
 
         return q_teacher
 
@@ -254,14 +278,10 @@ class Neural:
 
 if __name__ == '__main__':
 
-    for i in numpy.linspace(-20,20,40):
-        print(i,q2nn(i))
-
-    raw_input()
-
     print('1')
-    X = numpy.array([[2, 0.5,2], [0, 0.1,3], [1, 0,0.2], [1, 1,0.4]])
-    T = numpy.array([[1, 2], [3, 1], [0.5, 1], [1, 0]])
+
+    X = numpy.array([[-2, 0.5,2], [0, 0.1,3], [1, 0,0.2], [1, 1,0.4]])
+    T = numpy.array([[1, 0.2], [0.3, 1], [0.5, 1], [1, 0]])
     N = X.shape[0] # number of data
 
     input_size = X.shape[1]
@@ -273,15 +293,19 @@ if __name__ == '__main__':
     epoch = 10000
 
     print('2')
-    nn = Neural(input_size, hidden_size, output_size)
+    nn = Neural(input_size, hidden_size, output_size,epsilon, mu, epoch, 1,1)
     print('3')
-    nn.train(X, T, epsilon, mu, epoch)
+    #nn.train(X, T, epsilon, mu, epoch)
+    nn.train(X, T)
     #nn.error_graph()
 
     print('4')
     #print('print',nn.predict(X,T))
     C, Y = nn.predict(X)
-    print(C,Y)
+
+    X2 = numpy.array([[-2.1, 0.5,2], [0, 0.1,2.5], [1, -0.1,0.2], [-0.1, 1,0.4]])
+    print(nn.predict(X2))
+
 
     for i in range(N):
         x = X[i, :]
