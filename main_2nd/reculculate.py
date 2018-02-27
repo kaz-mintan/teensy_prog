@@ -32,7 +32,7 @@ num_episodes = 12  #number of all trials
 type_face = 5
 type_ir = 5 #5 ir sensors
 type_action =3 #3(pwm,delay,num of array)
-state_ir = 1 #number of argument of state(ir sensor)
+state_ir = 2 #number of argument of state(ir sensor)
 
 gamma = 0.9
 alpha = 0.5
@@ -61,6 +61,7 @@ action_actual=action_data[:,2:5]
 #action_actual=np.concatenate(([[0,0,11]],action_org),axis=0)
 print('action',action_actual)
 
+print('reward_data',reward_data[:,1])
 reward = np.insert(reward_data[:,1],0,0)
 print('reward',reward)
 random_rate = 0
@@ -89,11 +90,17 @@ p_array= numpy.zeros((q_input_size,1)) #to stock predicted argument
 for episode in range(num_episodes-1):  #repeat for number of trials
     print('episode',episode)
     state=state_data[np.where(state_data[:,0]==episode),2:2+type_face]
-    #print('state',state)
     ir_no = mean_data[episode,6]
-    print('ir_no',ir_no)
-    state_mean[:,episode] = seq2feature(state_mean[:,episode], state, ir_no,type_face)
+    state_random = mean_data[episode,7]
+    #print('ir_no',ir_no)
+    #state_mean[:,episode] = seq2feature_org(state_mean[:,episode], state, ir_no,type_face,state_random)
+    #state_mean[:,episode] = seq2feature(state_mean[:,episode], state, ir_no,type_face)
+    state_mean[:,episode] = mean_data[episode,1:8]
+
     print('state_mean',state_mean[:,episode])
+
+    with open('test_state_mean.csv', 'a') as smean_handle:
+        numpy.savetxt(smean_handle,tmp_log(np.hstack((np.array([episode]),state_mean[:,episode])),datetime.now()),fmt="%.20f",delimiter=",")
 
     ### calcurate a_{t} based on s_{t}
     random[episode], action[:,episode], next_q, small_q = Q_func.reculc_gen_action(possible_a, state_mean, episode, random_rate)
@@ -103,8 +110,8 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     p_array[:,0]=numpy.hstack((state_mean[:,episode+1],inv_action[:,episode]))
     c,actual_q_val = Q_func.predict(p_array.T)
     rate_q = (actual_q_val[0,0]-small_q)/diff_q
-    with open('q_check.csv', 'a') as q_handle:
-        numpy.savetxt(q_handle,tmp_log(np.hstack((np.array([episode]),np.array(next_q),np.array(small_q),np.array(actual_q_val[0,0]),np.array(diff_q),np.array(rate_q))),datetime.now()),fmt="%.5f",delimiter=",")
+    #with open('q_check.csv', 'a') as q_handle:
+        #numpy.savetxt(q_handle,tmp_log(np.hstack((np.array([episode]),np.array(next_q),np.array(small_q),np.array(actual_q_val[0,0]),np.array(diff_q),np.array(rate_q))),datetime.now()),fmt="%.5f",delimiter=",")
 
     action_array = convert_action(action[:,episode],ir_no)
 
@@ -112,5 +119,7 @@ for episode in range(num_episodes-1):  #repeat for number of trials
     with open('re_action_check.csv', 'a') as act_handle:
         numpy.savetxt(act_handle,tmp_log(np.hstack((np.array([episode]),random[episode],convert_action(action[:,episode],ir_no),action_actual[episode,:])),datetime.now()),fmt="%.3f",delimiter=",")
 
-    q_teacher = Q_func.update(state_mean,inv_action,episode,q_teacher,reward,actual_q_val)
+    #q_teacher = Q_func.update(state_mean,inv_action,episode,q_teacher,reward,actual_q_val)
+    q_teacher = Q_func.update(state_mean,action,episode,q_teacher,reward,actual_q_val)
+    Q_func.reproduct_test(state_mean,inv_action,q_teacher,10,episode)
     #q_teacher = Q_func.update(state_mean,inv_convert_action(action_actual),episode-1,q_teacher,reward,actual_q_val)
