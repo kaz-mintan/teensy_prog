@@ -3,6 +3,8 @@ import numpy as np
 from datetime import datetime
 
 def tmp_log(array,now):
+    print('array',array)
+    print('shape',array.shape)
     log_array = np.empty((1,array.shape[0]+5))
     log_array[0,:array.shape[0]]=array
     log_array[0,array.shape[0]:]=\
