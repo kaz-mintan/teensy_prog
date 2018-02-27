@@ -46,20 +46,28 @@ def convert_action(action,ir_no):
     return np.array([pwm_input,delay,array_num])
 
 def inv_convert_action(action):
-    pwm_row = (action[0]-35.0)/50.0
-    delay_row = (action[1]-0.1)/1.4
-    symmetry_row = num2symmetry(action[2])/2.0
+    np.ones_like(action[:,0])
+    pwm_row = (action[:,0]-np.ones_like(action[:,0])*35.0)/50.0
+    delay_row = (action[:,1]-np.ones_like(action[:,1])*0.1)/1.4
+    symmetry_row = np.zeros_like(pwm_row)
+    for i in range(action.shape[0]):
+        symmetry_row[i] = num2symmetry(action[i,2])/2.0
 
     return np.array([pwm_row, delay_row, symmetry_row])
 
 if __name__ == '__main__':
-    action_conv=np.array([35,0.7,8])
-    print('inv_conv',inv_convert_action(action_conv))
     type_action = 3
-    action = np.zeros((type_action,1))
-    action[0,0]=1
-    action[1,0]=0.4
-    action[2,0]=0.1
+    action = np.zeros((type_action,2))
+
+    action[0,0]=35
+    action[1,0]=1.4
+    action[2,0]=11
+
+    action[0,1]=82
+    action[1,1]=0.5
+    action[2,1]=22
+
     ir_no = 2
-    print(convert_action(action[:,0],ir_no))
+    print(action)
+    print(inv_convert_action(action.T))
 
